@@ -60,21 +60,31 @@ The optimizer now reacts to driver selection and surfaces result changes more cl
 └── .gitignore
 ```
 
-## Features
-
 ## Project Preview
 
-<img width="997" height="892" alt="race-archive" src="https://github.com/user-attachments/assets/bbb313f8-f25c-454a-9bc7-60cd5b6d8178" />
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/a49b5180-f873-4155-ad5b-024c3d0001bc" width="90%"/>
+</p>
 
+<br>
 
-<img width="998" height="909" alt="tyre-degradation" src="https://github.com/user-attachments/assets/3e6e7ef5-286b-4101-ac8c-2253b2bc352b" />
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/0ceae334-eefc-4b99-8175-1f84894abaee" width="70%"/>
+</p>
 
+<br>
 
-<img width="740" height="875" alt="optimizer-engine" src="https://github.com/user-attachments/assets/0ceae334-eefc-4b99-8175-1f84894abaee" />
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/3e6e7ef5-286b-4101-ac8c-2253b2bc352b" width="90%"/>
+</p>
 
+<br>
 
-<img width="1583" height="893" alt="dashboard-pitstops" src="https://github.com/user-attachments/assets/a49b5180-f873-4155-ad5b-024c3d0001bc" />
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/bbb313f8-f25c-454a-9bc7-60cd5b6d8178" width="90%"/>
+</p>
 
+## Features
 
 ### 1. Historical race control
 

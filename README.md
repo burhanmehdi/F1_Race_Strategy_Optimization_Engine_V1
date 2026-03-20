@@ -62,46 +62,6 @@ The optimizer now reacts to driver selection and surfaces result changes more cl
 
 ## Features
 
-## 🏎️ F1 Strategy Engine — Product Preview
-
-### 📊 Pit Stop Strategy Dashboard
-<p align="center">
-  <img src="docs/images/dashboard-pitstops.png" width="90%"/>
-</p>
-<p align="center"><em>Analyze real race pit-stop strategies, tyre usage, and stint patterns.</em></p>
-
----
-
-### 🧠 Strategy Optimizer Engine
-<p align="center">
-  <img src="docs/images/optimizer-engine.png" width="90%"/>
-</p>
-<p align="center"><em>AI-driven race strategy optimization with time gain, probability, and risk analysis.</em></p>
-
----
-
-### 🏁 Simulation Engine
-<p align="center">
-  <img src="docs/images/simulation-results.png" width="90%"/>
-</p>
-<p align="center"><em>10,000+ race simulations with probabilistic finishing distributions.</em></p>
-
----
-
-### 📉 Tyre Degradation Modeling
-<p align="center">
-  <img src="docs/images/tyre-degradation.png" width="90%"/>
-</p>
-<p align="center"><em>Compound-wise degradation curves with real-time stint tracking.</em></p>
-
----
-
-### 📚 Race Archive & Data Explorer
-<p align="center">
-  <img src="docs/images/race-archive.png" width="90%"/>
-</p>
-<p align="center"><em>Browse historical races with structured metadata and insights.</em></p>
-
 ### 1. Historical race control
 
 Select season, Grand Prix, and circuit from the backend catalog to drive the rest of the dashboard.

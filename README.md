@@ -40,20 +40,6 @@ This project combines:
 
 The goal is to make this feel closer to a real race engineering decision-support tool than a basic dashboard demo.
 
-## Preview
-
-### Dashboard Overview
-
-![Dashboard overview](assets/screenshots/dashboard-preview.svg)
-
-### Optimizer View
-
-![Optimizer preview](assets/screenshots/optimizer-preview.svg)
-
-### Race Engineer View
-
-![Race Engineer preview](assets/screenshots/race-engineer-preview.svg)
-
 ## Current Scope
 
 The app currently supports:

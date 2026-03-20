@@ -1,0 +1,59 @@
+<svg width="1400" height="820" viewBox="0 0 1400 820" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1400" height="820" rx="28" fill="#090B10"/>
+  <rect x="22" y="22" width="1356" height="78" rx="20" fill="#11141B" stroke="rgba(255,255,255,0.08)"/>
+  <text x="56" y="70" fill="#F4F5F7" font-family="Arial, sans-serif" font-size="38" font-weight="700">F1 Strategy Engine</text>
+  <text x="56" y="70" fill="#FF1739" font-family="Arial, sans-serif" font-size="38" font-weight="700">F1</text>
+  <rect x="760" y="38" width="174" height="44" rx="14" fill="#1B2030" stroke="#FF1739"/>
+  <text x="782" y="65" fill="#F4F5F7" font-family="Arial, sans-serif" font-size="18" font-weight="700">RACE ENGINEER</text>
+
+  <rect x="22" y="124" width="398" height="654" rx="24" fill="#11141B" stroke="rgba(255,255,255,0.08)"/>
+  <text x="52" y="164" fill="#8F97AA" font-family="Arial, sans-serif" font-size="18" letter-spacing="2">ENGINEER INPUTS</text>
+  <rect x="52" y="198" width="338" height="56" rx="14" fill="#1B2030" stroke="rgba(255,255,255,0.12)"/>
+  <rect x="52" y="284" width="160" height="56" rx="14" fill="#1B2030" stroke="rgba(255,255,255,0.12)"/>
+  <rect x="230" y="284" width="160" height="56" rx="14" fill="#1B2030" stroke="rgba(255,255,255,0.12)"/>
+  <rect x="52" y="370" width="338" height="18" rx="9" fill="#242938"/>
+  <rect x="52" y="370" width="124" height="18" rx="9" fill="#FF1739"/>
+  <rect x="52" y="432" width="338" height="18" rx="9" fill="#242938"/>
+  <rect x="52" y="432" width="178" height="18" rx="9" fill="#FFD60A"/>
+  <rect x="52" y="528" width="338" height="60" rx="16" fill="#FF1739"/>
+  <text x="124" y="566" fill="white" font-family="Arial, sans-serif" font-size="24" font-weight="700">RUN RACE ENGINEER</text>
+
+  <rect x="444" y="124" width="934" height="184" rx="24" fill="#151922" stroke="rgba(255,255,255,0.08)"/>
+  <text x="478" y="160" fill="#8F97AA" font-family="Arial, sans-serif" font-size="16" letter-spacing="2">PRIMARY CALL</text>
+  <text x="478" y="216" fill="#F4F5F7" font-family="Arial, sans-serif" font-size="56" font-weight="700">BOX LAP 24</text>
+  <text x="478" y="258" fill="#B6BDD0" font-family="Arial, sans-serif" font-size="24">Plan A: Medium → Hard • Plan B if safety car L18-L24: extend to lap 27</text>
+  <rect x="1034" y="152" width="140" height="118" rx="18" fill="#1D2230" stroke="rgba(255,255,255,0.10)"/>
+  <text x="1060" y="186" fill="#8F97AA" font-family="Arial, sans-serif" font-size="15">CONFIDENCE</text>
+  <text x="1062" y="242" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="42" font-weight="700">78%</text>
+  <rect x="1192" y="152" width="150" height="118" rx="18" fill="#1D2230" stroke="rgba(255,255,255,0.10)"/>
+  <text x="1218" y="186" fill="#8F97AA" font-family="Arial, sans-serif" font-size="15">MAIN RISK</text>
+  <text x="1210" y="242" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="34" font-weight="700">Traffic</text>
+
+  <rect x="444" y="332" width="446" height="170" rx="22" fill="#11141B" stroke="rgba(255,255,255,0.08)"/>
+  <text x="472" y="370" fill="#8F97AA" font-family="Arial, sans-serif" font-size="18">PRIMARY STRATEGY</text>
+  <text x="472" y="420" fill="#F4F5F7" font-family="Arial, sans-serif" font-size="30" font-weight="700">MEDIUM → HARD</text>
+  <text x="472" y="456" fill="#B6BDD0" font-family="Arial, sans-serif" font-size="22">Expected time: 1:27:14.221</text>
+
+  <rect x="932" y="332" width="446" height="170" rx="22" fill="#11141B" stroke="rgba(255,255,255,0.08)"/>
+  <text x="960" y="370" fill="#8F97AA" font-family="Arial, sans-serif" font-size="18">FALLBACK STRATEGY</text>
+  <text x="960" y="420" fill="#F4F5F7" font-family="Arial, sans-serif" font-size="30" font-weight="700">MEDIUM → MEDIUM → SOFT</text>
+  <text x="960" y="456" fill="#B6BDD0" font-family="Arial, sans-serif" font-size="22">Trigger if safety car probability spikes or undercut gap closes.</text>
+
+  <rect x="444" y="526" width="446" height="252" rx="22" fill="#11141B" stroke="rgba(255,255,255,0.08)"/>
+  <text x="472" y="564" fill="#8F97AA" font-family="Arial, sans-serif" font-size="18">SENSITIVITY MAP</text>
+  <rect x="472" y="606" width="360" height="16" rx="8" fill="#242938"/>
+  <rect x="472" y="606" width="280" height="16" rx="8" fill="#FF1739"/>
+  <rect x="472" y="652" width="360" height="16" rx="8" fill="#242938"/>
+  <rect x="472" y="652" width="202" height="16" rx="8" fill="#FFD60A"/>
+  <rect x="472" y="698" width="360" height="16" rx="8" fill="#242938"/>
+  <rect x="472" y="698" width="154" height="16" rx="8" fill="#ECEDEF"/>
+
+  <rect x="932" y="526" width="446" height="252" rx="22" fill="#11141B" stroke="rgba(255,255,255,0.08)"/>
+  <text x="960" y="564" fill="#8F97AA" font-family="Arial, sans-serif" font-size="18">SCENARIO COMPARISON</text>
+  <rect x="960" y="596" width="110" height="34" rx="12" fill="#1D2230" stroke="#FF1739"/>
+  <text x="990" y="618" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="16" font-weight="700">GREEN</text>
+  <rect x="1084" y="596" width="110" height="34" rx="12" fill="#1D2230" stroke="rgba(255,255,255,0.10)"/>
+  <text x="1108" y="618" fill="#D7DEEA" font-family="Arial, sans-serif" font-size="16" font-weight="700">SC</text>
+  <rect x="1208" y="596" width="110" height="34" rx="12" fill="#1D2230" stroke="rgba(255,255,255,0.10)"/>
+  <text x="1234" y="618" fill="#D7DEEA" font-family="Arial, sans-serif" font-size="16" font-weight="700">RAIN</text>
+</svg>

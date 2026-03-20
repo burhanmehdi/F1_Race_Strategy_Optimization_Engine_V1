@@ -77,3 +77,95 @@ def test_simulation_endpoint_returns_three_cards() -> None:
     payload = response.json()
     assert len(payload["cards"]) == 3
     assert payload["cards"][0]["distribution"]
+
+
+def test_model_lab_endpoint_returns_metrics() -> None:
+    client = TestClient(app)
+    response = client.get("/api/model-lab")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["models"]
+    assert any(model["model_id"] == "lap_time" for model in payload["models"])
+    assert payload["backtest"]
+    assert payload["calibration"]
+    assert payload["summary"]
+
+
+def test_race_engineer_endpoint_returns_primary_and_fallback() -> None:
+    client = TestClient(app)
+    catalog = client.get("/api/catalog").json()
+    race_id = catalog["races"][0]["race_id"]
+    response = client.post(
+        "/race-engineer",
+        json={
+            "race_id": race_id,
+            "driver_code": "VER",
+            "grid_position": 3,
+            "gap_ahead_seconds": 1.8,
+            "gap_behind_seconds": 1.5,
+            "weather_risk": 0.12,
+            "traffic_risk": 0.2,
+            "safety_car_window_start": 18,
+            "safety_car_window_end": 24,
+            "race_state": {
+                "driver_code": "VER",
+                "current_lap": 18,
+                "total_laps": 57,
+                "current_compound": "MEDIUM",
+                "tire_age_laps": 12,
+                "pit_loss_seconds": 21.5,
+                "base_lap_time_seconds": 91.2,
+                "fuel_penalty_per_lap": 0.03,
+                "safety_car_probability": 0.18,
+                "degradation_per_lap": 0.09,
+                "max_pit_stops": 3,
+                "compound_delta_seconds": 0.6,
+            },
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["primary"]["strategy_name"]
+    assert payload["fallback"]["strategy_name"]
+    assert payload["assumptions"]
+    assert payload["lap_by_lap_callouts"]
+
+
+def test_race_engineer_scenario_comparison_returns_four_views() -> None:
+    client = TestClient(app)
+    response = client.post(
+        "/race-engineer/scenarios",
+        json={
+            "race_id": "1046",
+            "driver_code": "VER",
+            "grid_position": 3,
+            "gap_ahead_seconds": 1.8,
+            "gap_behind_seconds": 1.5,
+            "weather_risk": 0.12,
+            "traffic_risk": 0.2,
+            "safety_car_window_start": 18,
+            "safety_car_window_end": 24,
+            "race_state": {
+                "driver_code": "VER",
+                "current_lap": 18,
+                "total_laps": 57,
+                "current_compound": "MEDIUM",
+                "tire_age_laps": 12,
+                "pit_loss_seconds": 21.5,
+                "base_lap_time_seconds": 91.2,
+                "fuel_penalty_per_lap": 0.03,
+                "safety_car_probability": 0.18,
+                "degradation_per_lap": 0.09,
+                "max_pit_stops": 3,
+                "compound_delta_seconds": 0.6,
+            },
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert len(payload["scenarios"]) == 4
+    assert any(item["scenario_id"] == "green" for item in payload["scenarios"])
+    assert any(item["scenario_id"] == "safety_car" for item in payload["scenarios"])

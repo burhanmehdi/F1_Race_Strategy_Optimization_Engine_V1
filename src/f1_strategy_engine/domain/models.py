@@ -148,3 +148,108 @@ class HistoricalRaceDetail(BaseModel):
     archive_note: str
     drivers: List[str]
     pitstop_rows: List[HistoricalPitStopRow]
+
+
+class FeatureImportance(BaseModel):
+    feature: str
+    importance: float = Field(..., ge=0)
+
+
+class ModelMetricCard(BaseModel):
+    model_id: str
+    title: str
+    target: str
+    algorithm: str
+    sample_count: int = Field(..., ge=0)
+    mae: float = Field(..., ge=0)
+    rmse: float = Field(..., ge=0)
+    r2: float
+    trained_on: str
+    feature_importance: List[FeatureImportance]
+
+
+class BacktestRaceResult(BaseModel):
+    race_id: str
+    season: int
+    grand_prix: str
+    driver_code: str
+    actual_lap_time_seconds: float = Field(..., ge=0)
+    predicted_lap_time_seconds: float = Field(..., ge=0)
+    absolute_error_seconds: float = Field(..., ge=0)
+    actual_pit_stops: float = Field(..., ge=0)
+    predicted_pit_stops: float = Field(..., ge=0)
+
+
+class ModelLabResponse(BaseModel):
+    generated_at: str
+    models: List[ModelMetricCard]
+    backtest: List[BacktestRaceResult]
+    calibration: List["CalibrationBin"]
+    summary: List[str]
+
+
+class RaceEngineerRequest(BaseModel):
+    race_id: str | None = None
+    race_state: RaceState
+    driver_code: str
+    grid_position: int = Field(..., ge=1, le=20)
+    gap_ahead_seconds: float = Field(1.8, ge=0)
+    gap_behind_seconds: float = Field(1.6, ge=0)
+    weather_risk: float = Field(0.1, ge=0, le=1)
+    traffic_risk: float = Field(0.2, ge=0, le=1)
+    safety_car_window_start: int = Field(..., ge=1)
+    safety_car_window_end: int = Field(..., ge=1)
+
+
+class ScenarioRecommendation(BaseModel):
+    label: str
+    trigger: str
+    strategy_name: str
+    expected_race_time_seconds: float = Field(..., ge=0)
+    confidence: float = Field(..., ge=0, le=1)
+    pit_laps: List[int]
+    compounds: List[TireCompound]
+
+
+class SensitivityMetric(BaseModel):
+    factor: str
+    level: str
+    effect: str
+
+
+class RaceEngineerResponse(BaseModel):
+    driver_code: str
+    predicted_push_lap_time_seconds: float = Field(..., ge=0)
+    primary: ScenarioRecommendation
+    fallback: ScenarioRecommendation
+    confidence: float = Field(..., ge=0, le=1)
+    assumptions: List[str]
+    lap_by_lap_callouts: List[str]
+    sensitivities: List[SensitivityMetric]
+
+
+class CalibrationBin(BaseModel):
+    label: str
+    predicted_mean: float
+    actual_mean: float
+    count: int = Field(..., ge=0)
+
+
+class ScenarioComparisonItem(BaseModel):
+    scenario_id: str
+    title: str
+    trigger: str
+    strategy_name: str
+    expected_race_time_seconds: float = Field(..., ge=0)
+    win_probability: float = Field(..., ge=0, le=1)
+    confidence: float = Field(..., ge=0, le=1)
+    risk_level: str
+    pit_laps: List[int]
+    compounds: List[TireCompound]
+    summary: str
+
+
+class ScenarioComparisonResponse(BaseModel):
+    driver_code: str
+    race_id: str | None = None
+    scenarios: List[ScenarioComparisonItem]

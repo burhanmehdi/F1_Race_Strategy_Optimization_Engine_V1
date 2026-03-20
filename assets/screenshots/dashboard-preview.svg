@@ -1,0 +1,45 @@
+<svg width="1400" height="820" viewBox="0 0 1400 820" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1400" height="820" rx="28" fill="#090B10"/>
+  <rect x="22" y="22" width="1356" height="78" rx="20" fill="#11141B" stroke="rgba(255,255,255,0.08)"/>
+  <text x="56" y="70" fill="#F4F5F7" font-family="Arial, sans-serif" font-size="38" font-weight="700">F1 Strategy Engine</text>
+  <text x="56" y="70" fill="#FF1739" font-family="Arial, sans-serif" font-size="38" font-weight="700">F1</text>
+  <rect x="428" y="40" width="154" height="40" rx="12" fill="#FF1739"/>
+  <text x="460" y="66" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="700">ALL-TIME</text>
+  <rect x="760" y="38" width="138" height="44" rx="14" fill="#1B2030" stroke="#FF1739"/>
+  <text x="790" y="65" fill="#F4F5F7" font-family="Arial, sans-serif" font-size="18" font-weight="700">PIT STOPS</text>
+  <rect x="914" y="38" width="138" height="44" rx="14" fill="#13161D" stroke="rgba(255,255,255,0.08)"/>
+  <text x="944" y="65" fill="#8F97AA" font-family="Arial, sans-serif" font-size="18" font-weight="700">OPTIMIZER</text>
+  <rect x="1068" y="38" width="138" height="44" rx="14" fill="#13161D" stroke="rgba(255,255,255,0.08)"/>
+  <text x="1098" y="65" fill="#8F97AA" font-family="Arial, sans-serif" font-size="18" font-weight="700">SIMULATION</text>
+
+  <rect x="22" y="124" width="1356" height="176" rx="24" fill="#11141B" stroke="rgba(255,255,255,0.08)"/>
+  <text x="54" y="162" fill="#8F97AA" font-family="Arial, sans-serif" font-size="18" letter-spacing="2">HISTORIC RACE CONTROL</text>
+  <text x="54" y="222" fill="#F4F5F7" font-family="Arial, sans-serif" font-size="64" font-weight="700">ANALYZE ANY F1 RACE</text>
+  <text x="54" y="262" fill="#B6BDD0" font-family="Arial, sans-serif" font-size="26">Race-aware pit board, optimizer, simulation, archive, and model workflows.</text>
+  <rect x="920" y="150" width="380" height="92" rx="18" fill="#171C26" stroke="rgba(255,255,255,0.08)"/>
+  <text x="948" y="182" fill="#8F97AA" font-family="Arial, sans-serif" font-size="16">RACE FEATURE</text>
+  <text x="948" y="216" fill="#F4F5F7" font-family="Arial, sans-serif" font-size="34" font-weight="700">AUSTRALIAN GP</text>
+  <text x="948" y="236" fill="#B6BDD0" font-family="Arial, sans-serif" font-size="18">Melbourne • Flexible two-stop • 58 laps</text>
+
+  <rect x="22" y="324" width="1356" height="454" rx="24" fill="#11141B" stroke="rgba(255,255,255,0.08)"/>
+  <text x="54" y="370" fill="#8F97AA" font-family="Arial, sans-serif" font-size="18" letter-spacing="2">TYRE USAGE BOARD</text>
+  <text x="54" y="432" fill="#F4F5F7" font-family="Arial, sans-serif" font-size="62" font-weight="700">MELBOURNE PIT STOPS</text>
+  <text x="54" y="470" fill="#B6BDD0" font-family="Arial, sans-serif" font-size="24">2018 Australian Grand Prix • 20 drivers • 58 laps</text>
+  <rect x="1120" y="352" width="210" height="150" rx="22" fill="#171C26" stroke="rgba(255,255,255,0.08)"/>
+  <text x="1150" y="390" fill="#8F97AA" font-family="Arial, sans-serif" font-size="18">TOTAL PIT STOPS</text>
+  <text x="1162" y="460" fill="#FF1739" font-family="Arial, sans-serif" font-size="74" font-weight="700">17</text>
+
+  <rect x="56" y="520" width="1240" height="208" rx="22" fill="#0D1016" stroke="rgba(255,255,255,0.06)"/>
+  <text x="108" y="560" fill="#7E879A" font-family="Arial, sans-serif" font-size="22" font-weight="700">VER</text>
+  <rect x="160" y="538" width="356" height="32" rx="10" fill="#FFD60A"/>
+  <rect x="516" y="538" width="370" height="32" rx="10" fill="#ECEDEF"/>
+  <rect x="886" y="538" width="268" height="32" rx="10" fill="#FF1739"/>
+  <text x="108" y="612" fill="#7E879A" font-family="Arial, sans-serif" font-size="22" font-weight="700">LEC</text>
+  <rect x="160" y="590" width="280" height="32" rx="10" fill="#FFD60A"/>
+  <rect x="440" y="590" width="442" height="32" rx="10" fill="#ECEDEF"/>
+  <rect x="882" y="590" width="272" height="32" rx="10" fill="#ECEDEF"/>
+  <text x="108" y="664" fill="#7E879A" font-family="Arial, sans-serif" font-size="22" font-weight="700">NOR</text>
+  <rect x="160" y="642" width="214" height="32" rx="10" fill="#FF1739"/>
+  <rect x="374" y="642" width="322" height="32" rx="10" fill="#FFD60A"/>
+  <rect x="696" y="642" width="458" height="32" rx="10" fill="#ECEDEF"/>
+</svg>

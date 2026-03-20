@@ -7,6 +7,16 @@ const globalSeason = document.getElementById("global-season");
 const globalRace = document.getElementById("global-race");
 const globalCircuit = document.getElementById("global-circuit");
 const seasonTag = document.getElementById("season-tag");
+const contextRaceSummary = document.getElementById("context-race-summary");
+const contextRaceNote = document.getElementById("context-race-note");
+const contextUsageChips = document.getElementById("context-usage-chips");
+const contextSectionMap = document.getElementById("context-section-map");
+const contextTrackTitle = document.getElementById("context-track-title");
+const contextTrackMeta = document.getElementById("context-track-meta");
+const contextTrackBias = document.getElementById("context-track-bias");
+const contextTrackPitloss = document.getElementById("context-track-pitloss");
+const contextTrackSc = document.getElementById("context-track-sc");
+const contextTrackOvertake = document.getElementById("context-track-overtake");
 
 const summaryTime = document.getElementById("summary-time");
 const summaryConfidence = document.getElementById("summary-confidence");
@@ -23,6 +33,34 @@ const optimizerStatus = document.getElementById("optimizer-status");
 const resultsLoading = document.getElementById("results-loading");
 const optimizerDriver = document.getElementById("optimizer-driver");
 const optimizerRanked = document.getElementById("optimizer-ranked");
+const engineerDriver = document.getElementById("engineer-driver");
+const engineerGridPosition = document.getElementById("engineer-grid-position");
+const engineerGapAhead = document.getElementById("engineer-gap-ahead");
+const engineerGapBehind = document.getElementById("engineer-gap-behind");
+const engineerWeatherRisk = document.getElementById("engineer-weather-risk");
+const engineerTrafficRisk = document.getElementById("engineer-traffic-risk");
+const engineerWeatherLabel = document.getElementById("engineer-weather-label");
+const engineerTrafficLabel = document.getElementById("engineer-traffic-label");
+const engineerScWindowStart = document.getElementById("engineer-sc-window-start");
+const engineerScWindowEnd = document.getElementById("engineer-sc-window-end");
+const runRaceEngineerButton = document.getElementById("run-race-engineer");
+const raceEngineerStatus = document.getElementById("race-engineer-status");
+const engineerPushLap = document.getElementById("engineer-push-lap");
+const engineerHeadline = document.getElementById("engineer-headline");
+const engineerDriverHero = document.getElementById("engineer-driver-hero");
+const engineerConfidence = document.getElementById("engineer-confidence");
+const engineerPrimaryTrigger = document.getElementById("engineer-primary-trigger");
+const engineerFallbackTrigger = document.getElementById("engineer-fallback-trigger");
+const engineerPrimaryName = document.getElementById("engineer-primary-name");
+const engineerPrimaryTime = document.getElementById("engineer-primary-time");
+const engineerPrimaryTags = document.getElementById("engineer-primary-tags");
+const engineerFallbackName = document.getElementById("engineer-fallback-name");
+const engineerFallbackTime = document.getElementById("engineer-fallback-time");
+const engineerFallbackTags = document.getElementById("engineer-fallback-tags");
+const engineerAssumptions = document.getElementById("engineer-assumptions");
+const engineerCallouts = document.getElementById("engineer-callouts");
+const engineerSensitivities = document.getElementById("engineer-sensitivities");
+const scenarioCompareGrid = document.getElementById("scenario-compare-grid");
 
 const heroWinProbability = document.getElementById("hero-win-probability");
 const heroImprovement = document.getElementById("hero-improvement");
@@ -61,6 +99,12 @@ const archiveSearch = document.getElementById("archive-search");
 const archiveTableBody = document.getElementById("archive-table-body");
 const archiveDetail = document.getElementById("archive-detail");
 const degradationSpecs = document.getElementById("degradation-specs");
+const modelLabGeneratedAt = document.getElementById("model-lab-generated-at");
+const modelLabCards = document.getElementById("model-lab-cards");
+const modelLabBacktestBody = document.getElementById("model-lab-backtest-body");
+const modelLabCalibration = document.getElementById("model-lab-calibration");
+const runModelLabButton = document.getElementById("run-model-lab");
+const modelLabStatus = document.getElementById("model-lab-status");
 
 const compoundClasses = {
   SOFT: "soft",
@@ -75,6 +119,45 @@ let latestPayload = null;
 let currentCompoundFilter = "ALL";
 let selectedArchiveRaceId = null;
 let currentDrivers = [];
+let modelLabLoaded = false;
+let activeViewName = "pitstops";
+const contextUsageByView = {
+  raceengineer: {
+    label: "Race Engineer",
+    scope: "direct",
+    summary: "Uses the selected race to set the strategy window, pit loss, lap count, and scenario assumptions.",
+  },
+  pitstops: {
+    label: "Pit Stops",
+    scope: "direct",
+    summary: "Loads the exact selected race board, driver rows, and pit-stop history.",
+  },
+  optimizer: {
+    label: "Optimizer",
+    scope: "direct",
+    summary: "Pre-fills the optimizer with the selected race defaults, tyre assumptions, and timing model inputs.",
+  },
+  simulation: {
+    label: "Simulation",
+    scope: "context",
+    summary: "Uses the selected race context for lap count, field profile, and scenario tuning before Monte Carlo runs.",
+  },
+  degradation: {
+    label: "Degradation",
+    scope: "context",
+    summary: "Adapts the tyre trend lines to the selected race pace and compound profile.",
+  },
+  archive: {
+    label: "Race Archive",
+    scope: "direct",
+    summary: "Shows the selected race as the active archive reference and detail panel.",
+  },
+  modellab: {
+    label: "Model Lab",
+    scope: "reference",
+    summary: "Trains and evaluates on all historical data, while the selected race acts as the reference lens for interpretation.",
+  },
+};
 
 function formatTime(seconds) {
   const minutes = Math.floor(seconds / 60);
@@ -83,8 +166,75 @@ function formatTime(seconds) {
 }
 
 function setActiveView(name) {
+  activeViewName = name;
   navPills.forEach((pill) => pill.classList.toggle("active", pill.dataset.tab === name));
   views.forEach((view) => view.classList.toggle("active", view.dataset.view === name));
+  if (window.location.hash !== `#${name}`) {
+    window.history.replaceState(null, "", `#${name}`);
+  }
+  renderContextGuide();
+}
+
+function getInitialViewName() {
+  const hashView = window.location.hash.replace("#", "").trim().toLowerCase();
+  const supportedViews = new Set(Array.from(views).map((view) => view.dataset.view));
+  return supportedViews.has(hashView) ? hashView : "pitstops";
+}
+
+function scopeLabel(scope) {
+  if (scope === "direct") {
+    return "Direct";
+  }
+  if (scope === "context") {
+    return "Context";
+  }
+  return "Reference";
+}
+
+function renderContextGuide() {
+  if (!contextRaceSummary || !contextRaceNote || !contextUsageChips) {
+    return;
+  }
+
+  if (!currentRaceDetail) {
+    contextRaceSummary.textContent = "Waiting for race load";
+    contextRaceNote.textContent = "Choose a season, Grand Prix, and circuit to update linked sections.";
+    contextUsageChips.innerHTML = "";
+    if (contextTrackTitle) {
+      contextTrackTitle.textContent = "Waiting for race load";
+      contextTrackMeta.textContent = "Circuit profile, risk balance, and race characteristics will appear here.";
+      contextTrackBias.textContent = "--";
+      contextTrackPitloss.textContent = "--";
+      contextTrackSc.textContent = "--";
+      contextTrackOvertake.textContent = "--";
+    }
+    if (contextSectionMap) {
+      contextSectionMap.innerHTML = "";
+    }
+    return;
+  }
+
+  contextRaceSummary.textContent = `${currentRaceDetail.season} ${currentRaceDetail.grand_prix} - ${currentRaceDetail.circuit}`;
+  contextRaceNote.textContent = "This race selection updates shared defaults, race history, simulation context, and archive reference data across the dashboard.";
+
+  const chipOrder = ["pitstops", "optimizer", "simulation", "degradation", "raceengineer", "archive", "modellab"];
+  contextUsageChips.innerHTML = chipOrder.map((view) => {
+    const config = contextUsageByView[view];
+    return `<span class="context-chip ${config.scope}">${config.label}</span>`;
+  }).join("");
+
+  if (contextTrackTitle) {
+    contextTrackTitle.textContent = `${currentRaceDetail.grand_prix}`;
+    contextTrackMeta.textContent = `${currentRaceDetail.circuit} • ${currentRaceDetail.country} • ${currentRaceDetail.laps} laps`;
+    contextTrackBias.textContent = currentRaceDetail.strategy_bias;
+    contextTrackPitloss.textContent = `${Number(currentRaceDetail.pit_loss_seconds).toFixed(1)}s`;
+    contextTrackSc.textContent = `${Math.round(Number(currentRaceDetail.safety_car_probability) * 100)}%`;
+    contextTrackOvertake.textContent = currentRaceDetail.overtake_difficulty;
+  }
+
+  if (contextSectionMap) {
+    contextSectionMap.innerHTML = "";
+  }
 }
 
 function setLoading(isLoading, label = "Running") {
@@ -195,6 +345,7 @@ function populateDriverDropdowns() {
     .join("");
   simDriver.innerHTML = options;
   optimizerDriver.innerHTML = options;
+  engineerDriver.innerHTML = options;
 }
 
 function renderPitstopBoard() {
@@ -343,6 +494,118 @@ function renderOptimizerRankedPlans(result) {
       </div>
     </article>
   `).join("");
+}
+
+function renderCompoundTags(container, pitLaps, compounds) {
+  const tags = compounds.map((compound, index) => {
+    const lap = pitLaps[index];
+    return `<span class="pit-tag ${compoundClasses[compound] || "hard"}">L${lap} ${compound}</span>`;
+  }).join("");
+  container.innerHTML = tags || '<span class="pit-tag hard">No stop</span>';
+}
+
+function renderRaceEngineer(result) {
+  engineerPushLap.textContent = `${result.predicted_push_lap_time_seconds.toFixed(3)}s`;
+  engineerHeadline.textContent = `${result.primary.strategy_name} is the leading call, with ${result.fallback.strategy_name} prepared as the fallback scenario.`;
+  engineerDriverHero.textContent = describeDriver(result.driver_code);
+  engineerConfidence.textContent = `${Math.round(result.confidence * 100)}%`;
+  engineerPrimaryTrigger.textContent = result.primary.trigger;
+  engineerFallbackTrigger.textContent = result.fallback.trigger;
+  engineerPrimaryName.textContent = result.primary.strategy_name;
+  engineerPrimaryTime.textContent = formatTime(result.primary.expected_race_time_seconds);
+  engineerFallbackName.textContent = result.fallback.strategy_name;
+  engineerFallbackTime.textContent = formatTime(result.fallback.expected_race_time_seconds);
+  renderCompoundTags(engineerPrimaryTags, result.primary.pit_laps, result.primary.compounds);
+  renderCompoundTags(engineerFallbackTags, result.fallback.pit_laps, result.fallback.compounds);
+  engineerAssumptions.innerHTML = result.assumptions.map((item) => `<li>${item}</li>`).join("");
+  engineerCallouts.innerHTML = result.lap_by_lap_callouts.map((item) => `<li>${item}</li>`).join("");
+  engineerSensitivities.innerHTML = result.sensitivities.map((item) => `
+    <article class="sensitivity-card">
+      <span class="small-label">${item.factor}</span>
+      <strong>${item.level}</strong>
+      <p>${item.effect}</p>
+    </article>
+  `).join("");
+}
+
+function renderScenarioComparison(result) {
+  scenarioCompareGrid.innerHTML = result.scenarios.map((item) => `
+    <article class="scenario-card">
+      <span class="small-label">${item.title}</span>
+      <strong>${item.strategy_name}</strong>
+      <p>${item.trigger}</p>
+      <div class="spec-list">
+        <div class="spec-row"><span>Race Time</span><strong>${formatTime(item.expected_race_time_seconds)}</strong></div>
+        <div class="spec-row"><span>Win Probability</span><strong>${Math.round(item.win_probability * 100)}%</strong></div>
+        <div class="spec-row"><span>Confidence</span><strong>${Math.round(item.confidence * 100)}%</strong></div>
+        <div class="spec-row"><span>Risk</span><strong>${item.risk_level}</strong></div>
+      </div>
+      <div class="tag-stack">
+        ${item.compounds.map((compound, index) => `<span class="pit-tag ${compoundClasses[compound] || "hard"}">L${item.pit_laps[index]} ${compound}</span>`).join("")}
+      </div>
+      <p class="recommendation-copy">${item.summary}</p>
+    </article>
+  `).join("");
+}
+
+function renderModelLab(result) {
+  modelLabGeneratedAt.textContent = `Generated ${new Date(result.generated_at).toLocaleString()}`;
+  modelLabCards.innerHTML = result.models.map((model) => `
+    <article class="model-card">
+      <div class="panel-title-row">
+        <p class="panel-kicker">${model.title}</p>
+        <span class="status-dot">${model.algorithm}</span>
+      </div>
+      <div class="spec-list">
+        <div class="spec-row"><span>Target</span><strong>${model.target}</strong></div>
+        <div class="spec-row"><span>Samples</span><strong>${model.sample_count}</strong></div>
+        <div class="spec-row"><span>MAE</span><strong>${model.mae}</strong></div>
+        <div class="spec-row"><span>RMSE</span><strong>${model.rmse}</strong></div>
+        <div class="spec-row"><span>R2</span><strong>${model.r2}</strong></div>
+      </div>
+      <div class="feature-list">
+        ${model.feature_importance.slice(0, 6).map((item) => `<div class="feature-chip">${item.feature}: ${item.importance}</div>`).join("")}
+      </div>
+    </article>
+  `).join("");
+  modelLabCalibration.innerHTML = result.calibration.map((item) => {
+    const delta = Math.abs(item.predicted_mean - item.actual_mean);
+    const height = Math.max(18, Math.min(110, delta * 24 + 18));
+    return `
+      <article class="calibration-card">
+        <span class="small-label">${item.label}</span>
+        <div class="calibration-bars">
+          <div>
+            <span>Predicted</span>
+            <div class="calibration-bar predicted" style="height:${height}px"></div>
+            <strong>${item.predicted_mean.toFixed(2)}</strong>
+          </div>
+          <div>
+            <span>Actual</span>
+            <div class="calibration-bar actual" style="height:${Math.max(18, Math.min(110, item.actual_mean * 0.9))}px"></div>
+            <strong>${item.actual_mean.toFixed(2)}</strong>
+          </div>
+        </div>
+        <p>${item.count} samples</p>
+      </article>
+    `;
+  }).join("");
+  modelLabBacktestBody.innerHTML = result.backtest.map((row) => `
+    <tr>
+      <td>${row.season}</td>
+      <td>${row.grand_prix}</td>
+      <td>${row.driver_code}</td>
+      <td>${row.actual_lap_time_seconds.toFixed(3)}s</td>
+      <td>${row.predicted_lap_time_seconds.toFixed(3)}s</td>
+      <td>${row.absolute_error_seconds.toFixed(3)}s</td>
+      <td>${row.actual_pit_stops.toFixed(1)} / ${row.predicted_pit_stops.toFixed(1)}</td>
+    </tr>
+  `).join("");
+  modelLabBacktestBody.insertAdjacentHTML("afterbegin", result.summary.map((item) => `
+    <tr class="summary-row">
+      <td colspan="7">${item}</td>
+    </tr>
+  `).join(""));
 }
 
 function renderDegradation(payload) {
@@ -494,6 +757,7 @@ function applyRaceDetail(detail) {
   renderPitstopBoard();
   renderArchiveDetail(detail);
   renderArchiveTable();
+  renderContextGuide();
 
   form.total_laps.value = detail.laps;
   form.current_lap.value = Math.min(18, detail.laps - 8);
@@ -511,9 +775,13 @@ function applyRaceDetail(detail) {
     const preferredDriver = currentDrivers.find((driver) => detail.drivers.includes(driver.code)) || currentDrivers[0];
     simDriver.value = preferredDriver.code;
     optimizerDriver.value = preferredDriver.code;
+    engineerDriver.value = preferredDriver.code;
   }
   gridPosition.value = Math.min(20, 3 + detail.round);
   gridPositionLabel.textContent = `P${gridPosition.value}`;
+  engineerGridPosition.value = gridPosition.value;
+  engineerScWindowStart.value = Math.min(detail.laps - 8, 18);
+  engineerScWindowEnd.value = Math.min(detail.laps - 2, 24);
 }
 
 function renderResult(payload, result) {
@@ -644,12 +912,98 @@ async function runSimulation() {
   }
 }
 
+async function runRaceEngineer() {
+  if (!currentRaceDetail) {
+    raceEngineerStatus.className = "panel simulation-status status-error";
+    raceEngineerStatus.textContent = "Race data is not loaded yet. Select a race first.";
+    return;
+  }
+
+  runRaceEngineerButton.disabled = true;
+  engineerHeadline.textContent = "Running race engineer analysis...";
+  raceEngineerStatus.className = "panel simulation-status status-running";
+  raceEngineerStatus.textContent = "Running primary, fallback, and scenario comparison analysis...";
+
+  try {
+    const payload = {
+      race_id: currentRaceDetail.race_id,
+      driver_code: engineerDriver.value || optimizerDriver.value,
+      grid_position: Number(engineerGridPosition.value),
+      gap_ahead_seconds: Number(engineerGapAhead.value),
+      gap_behind_seconds: Number(engineerGapBehind.value),
+      weather_risk: Number(engineerWeatherRisk.value),
+      traffic_risk: Number(engineerTrafficRisk.value),
+      safety_car_window_start: Number(engineerScWindowStart.value),
+      safety_car_window_end: Number(engineerScWindowEnd.value),
+      race_state: {
+        ...buildPayload(),
+        driver_code: engineerDriver.value || optimizerDriver.value,
+      },
+    };
+    const response = await fetch("/race-engineer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      throw new Error("Race Engineer request failed");
+    }
+    const result = await response.json();
+    renderRaceEngineer(result);
+    const compareResponse = await fetch("/race-engineer/scenarios", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!compareResponse.ok) {
+      throw new Error("Scenario comparison request failed");
+    }
+    const compareResult = await compareResponse.json();
+    renderScenarioComparison(compareResult);
+    raceEngineerStatus.className = "panel simulation-status status-success";
+    raceEngineerStatus.textContent = `Race Engineer updated for ${result.driver_code}. Primary and fallback plans are ready.`;
+  } catch (error) {
+    console.error("Race engineer failed:", error);
+    engineerHeadline.textContent = "Race engineer analysis failed for this configuration.";
+    scenarioCompareGrid.innerHTML = "";
+    raceEngineerStatus.className = "panel simulation-status status-error";
+    raceEngineerStatus.textContent = `Race Engineer failed: ${error.message || "Unable to generate recommendations."}`;
+  } finally {
+    runRaceEngineerButton.disabled = false;
+  }
+}
+
+async function loadModelLab(force = false) {
+  if (modelLabLoaded && !force) {
+    modelLabStatus.className = "panel simulation-status status-success";
+    modelLabStatus.textContent = "Model Lab is already loaded. Click Run Model Lab again to refresh.";
+    return;
+  }
+  runModelLabButton.disabled = true;
+  modelLabStatus.className = "panel simulation-status status-running";
+  modelLabStatus.textContent = "Training summaries, calibration bins, and backtesting are loading...";
+  try {
+    const result = await fetchJson("/api/model-lab", 15000);
+    renderModelLab(result);
+    modelLabLoaded = true;
+    modelLabStatus.className = "panel simulation-status status-success";
+    modelLabStatus.textContent = "Model Lab loaded. Metrics and backtesting are ready below.";
+  } catch (error) {
+    console.error("Model lab failed:", error);
+    modelLabStatus.className = "panel simulation-status status-error";
+    modelLabStatus.textContent = `Model Lab failed: ${error.message || "Unable to load evaluation outputs."}`;
+  } finally {
+    runModelLabButton.disabled = false;
+  }
+}
+
 async function loadRaceDetail(raceId) {
   const detail = await fetchJson(`/api/races/${raceId}`);
   globalRace.value = raceId;
   globalCircuit.value = raceId;
   applyRaceDetail(detail);
   await runOptimizer();
+  await runRaceEngineer();
 }
 
 function syncGlobalSelectorsFromRaceId(raceId) {
@@ -668,10 +1022,20 @@ async function initializeCatalog() {
   populateGlobalSelectors();
   populateArchiveFilters();
   populateDriverDropdowns();
+  renderContextGuide();
   await loadRaceDetail(globalRace.value);
+  await runRaceEngineer();
 }
 
-navPills.forEach((pill) => pill.addEventListener("click", () => setActiveView(pill.dataset.tab)));
+navPills.forEach((pill) => pill.addEventListener("click", async () => {
+  setActiveView(pill.dataset.tab);
+  if (pill.dataset.tab === "modellab") {
+    modelLabStatus.className = "panel simulation-status";
+    modelLabStatus.textContent = modelLabLoaded
+      ? "Model Lab is loaded. Click Run Model Lab to refresh."
+      : "Click Run Model Lab to load training metrics, calibration, and backtesting.";
+  }
+}));
 
 compoundPills.forEach((pill) => {
   pill.addEventListener("click", () => {
@@ -713,10 +1077,20 @@ gridPosition.addEventListener("input", () => {
 archiveSeasonFilter.addEventListener("change", renderArchiveTable);
 archiveCircuitFilter.addEventListener("change", renderArchiveTable);
 archiveSearch.addEventListener("input", renderArchiveTable);
+engineerWeatherRisk.addEventListener("input", () => {
+  engineerWeatherLabel.textContent = `${Math.round(Number(engineerWeatherRisk.value) * 100)}%`;
+});
+engineerTrafficRisk.addEventListener("input", () => {
+  engineerTrafficLabel.textContent = `${Math.round(Number(engineerTrafficRisk.value) * 100)}%`;
+});
 
 initializeCatalog().catch(() => {
   recommendedName.textContent = "Initialization failed";
   recommendedExplanation.textContent = "The dashboard could not load the historical race catalog from the backend.";
+  renderContextGuide();
 });
 
 runSimulationButton.addEventListener("click", runSimulation);
+runRaceEngineerButton.addEventListener("click", runRaceEngineer);
+runModelLabButton.addEventListener("click", () => loadModelLab(true));
+setActiveView(getInitialViewName());

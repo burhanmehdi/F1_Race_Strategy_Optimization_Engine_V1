@@ -40,6 +40,20 @@ This project combines:
 
 The goal is to make this feel closer to a real race engineering decision-support tool than a basic dashboard demo.
 
+## Preview
+
+### Dashboard Overview
+
+![Dashboard overview](assets/screenshots/dashboard-preview.svg)
+
+### Optimizer View
+
+![Optimizer preview](assets/screenshots/optimizer-preview.svg)
+
+### Race Engineer View
+
+![Race Engineer preview](assets/screenshots/race-engineer-preview.svg)
+
 ## Current Scope
 
 The app currently supports:
@@ -49,6 +63,9 @@ The app currently supports:
 - pit-stop board backed by real F1 CSV data
 - strategy optimization with ranked plans
 - simulation cards with outcome distributions
+- race engineer mode with primary and fallback calls
+- scenario comparison for green / safety car / rain / traffic cases
+- model lab with trained proxies, feature importance, backtesting, and calibration bins
 - tyre degradation and race archive views
 
 The optimizer now reacts to driver selection and surfaces result changes more clearly in the UI.
@@ -124,6 +141,12 @@ The dashboard also includes:
 - historical race archive browsing
 - tyre degradation visualization
 - model-oriented metadata hooks for future training pipelines
+
+### 6. Race Engineer and Model Lab
+
+Two AIML-focused sections now make the project much stronger for portfolio use:
+- `Race Engineer Mode` for primary strategy, fallback strategy, assumptions, lap-by-lap callouts, and side-by-side scenario comparison
+- `Model Lab` for trained proxy models, MAE/RMSE/R2, feature importance, backtesting rows, and calibration-style evaluation bins
 
 ## Data
 

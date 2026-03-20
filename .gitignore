@@ -5,3 +5,4 @@ __pycache__/
 logs/
 *.log
 data/f1db/f1db-csv.zip
+artifacts/

@@ -17,11 +17,13 @@
           <div class="season-tag" id="season-tag">All-Time Platform</div>
         </div>
         <nav class="topnav" aria-label="Primary">
+          <button class="nav-pill" data-tab="raceengineer">Race Engineer</button>
           <button class="nav-pill active" data-tab="pitstops">Pit Stops</button>
           <button class="nav-pill" data-tab="optimizer">Optimizer</button>
           <button class="nav-pill" data-tab="simulation">Simulation</button>
           <button class="nav-pill" data-tab="degradation">Degradation</button>
           <button class="nav-pill" data-tab="archive">Race Archive</button>
+          <button class="nav-pill" data-tab="modellab">Model Lab</button>
         </nav>
       </header>
 
@@ -31,20 +33,198 @@
             <p class="eyebrow">Historic Race Control</p>
             <h2>Analyze any F1 race from 2018 to now</h2>
             <p class="subtle-copy">Selections here drive the pit board, optimizer defaults, simulation context, and archive detail views.</p>
+            <div class="context-compact">
+              <div class="context-inline-block">
+                <span class="small-label">Current Race Context</span>
+                <strong id="context-race-summary">Waiting for race load</strong>
+                <p id="context-race-note" class="recommendation-copy">Choose a season, Grand Prix, and circuit to update linked sections.</p>
+              </div>
+              <div class="context-inline-block">
+                <span class="small-label">Used In</span>
+                <div id="context-usage-chips" class="context-usage-chips"></div>
+              </div>
+            </div>
           </div>
-          <div class="selector-grid">
-            <label class="toolbar-field">
-              <span>Season</span>
-              <select id="global-season"></select>
-            </label>
-            <label class="toolbar-field">
-              <span>Grand Prix</span>
-              <select id="global-race"></select>
-            </label>
-            <label class="toolbar-field">
-              <span>Circuit</span>
-              <select id="global-circuit"></select>
-            </label>
+          <div class="selector-side">
+            <div class="race-feature-card">
+              <div class="race-feature-copy">
+                <span class="small-label">Race Feature</span>
+                <strong id="context-track-title">Waiting for race load</strong>
+                <p id="context-track-meta" class="recommendation-copy">Circuit profile, risk balance, and race characteristics will appear here.</p>
+              </div>
+              <div class="race-feature-art" aria-hidden="true">
+                <img
+                  class="feature-logo-image"
+                  src="https://upload.wikimedia.org/wikipedia/commons/3/33/F1.svg"
+                  alt="Formula 1 logo"
+                />
+              </div>
+              <div class="race-feature-metrics">
+                <div class="feature-pill">
+                  <span class="small-label">Strategy Bias</span>
+                  <strong id="context-track-bias">--</strong>
+                </div>
+                <div class="feature-pill">
+                  <span class="small-label">Pit Loss</span>
+                  <strong id="context-track-pitloss">--</strong>
+                </div>
+                <div class="feature-pill">
+                  <span class="small-label">Safety Car</span>
+                  <strong id="context-track-sc">--</strong>
+                </div>
+                <div class="feature-pill">
+                  <span class="small-label">Overtaking</span>
+                  <strong id="context-track-overtake">--</strong>
+                </div>
+              </div>
+            </div>
+            <div class="selector-grid">
+              <label class="toolbar-field">
+                <span>Season</span>
+                <select id="global-season"></select>
+              </label>
+              <label class="toolbar-field">
+                <span>Grand Prix</span>
+                <select id="global-race"></select>
+              </label>
+              <label class="toolbar-field">
+                <span>Circuit</span>
+                <select id="global-circuit"></select>
+              </label>
+            </div>
+            <div class="selector-bottom-strip" aria-hidden="true">
+              <div class="selector-signal">
+                <span class="small-label">Strategy Feed</span>
+                <strong>Live race context synced</strong>
+              </div>
+              <div class="selector-divider"></div>
+              <div class="selector-mini-graph">
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" data-view="raceengineer">
+          <div class="view-header compact">
+            <div>
+              <p class="eyebrow">Flagship Decision Flow</p>
+              <h1>Race Engineer Mode</h1>
+              <p class="subtle-copy">Generate a primary call, fallback plan, and lap-by-lap reasoning for the selected race context.</p>
+            </div>
+          </div>
+
+          <div class="grid-layout">
+            <section class="panel controls-panel">
+              <div class="panel-title-row">
+                <p class="panel-kicker">Engineer Inputs</p>
+                <span class="status-chip">Scenario Control</span>
+              </div>
+              <div class="panel simulation-status" id="race-engineer-status">Set the inputs and click Run Race Engineer.</div>
+              <div class="control-form">
+                <label>
+                  <span>Driver</span>
+                  <select id="engineer-driver"></select>
+                </label>
+                <label>
+                  <span>Grid Position</span>
+                  <input id="engineer-grid-position" type="number" min="1" max="20" value="5" />
+                </label>
+                <label>
+                  <span>Gap Ahead (s)</span>
+                  <input id="engineer-gap-ahead" type="number" step="any" min="0" value="1.8" />
+                </label>
+                <label>
+                  <span>Gap Behind (s)</span>
+                  <input id="engineer-gap-behind" type="number" step="any" min="0" value="1.6" />
+                </label>
+                <label>
+                  <span>Weather Risk</span>
+                  <input id="engineer-weather-risk" type="range" min="0" max="1" step="0.01" value="0.12" />
+                  <strong id="engineer-weather-label">12%</strong>
+                </label>
+                <label>
+                  <span>Traffic Risk</span>
+                  <input id="engineer-traffic-risk" type="range" min="0" max="1" step="0.01" value="0.2" />
+                  <strong id="engineer-traffic-label">20%</strong>
+                </label>
+                <div class="split-fields">
+                  <label>
+                    <span>SC Window Start</span>
+                    <input id="engineer-sc-window-start" type="number" min="1" value="18" />
+                  </label>
+                  <label>
+                    <span>SC Window End</span>
+                    <input id="engineer-sc-window-end" type="number" min="1" value="24" />
+                  </label>
+                </div>
+                <button id="run-race-engineer" class="run-button" type="button">Run Race Engineer</button>
+              </div>
+            </section>
+
+            <section class="panel summary-panel">
+              <div class="result-hero race-engineer-hero">
+                <div>
+                  <span class="small-label">Predicted Push Lap</span>
+                  <h2 id="engineer-push-lap">--</h2>
+                  <p id="engineer-headline" class="recommendation-copy">Run Race Engineer to generate a strategic call sheet.</p>
+                </div>
+                <div class="result-flags">
+                  <div class="result-flag primary-highlight"><span>Driver</span><strong id="engineer-driver-hero">--</strong></div>
+                  <div class="result-flag"><span>Primary Confidence</span><strong id="engineer-confidence">--</strong></div>
+                  <div class="result-flag"><span>Primary Trigger</span><strong id="engineer-primary-trigger">--</strong></div>
+                  <div class="result-flag"><span>Fallback Trigger</span><strong id="engineer-fallback-trigger">--</strong></div>
+                </div>
+              </div>
+
+              <div class="comparison-grid engineer-cards">
+                <article class="comparison-card emphasized">
+                  <span class="small-label">Primary Call</span>
+                  <strong id="engineer-primary-name">--</strong>
+                  <p id="engineer-primary-time">--</p>
+                  <div class="tag-stack" id="engineer-primary-tags"></div>
+                </article>
+                <article class="comparison-card">
+                  <span class="small-label">Fallback Plan</span>
+                  <strong id="engineer-fallback-name">--</strong>
+                  <p id="engineer-fallback-time">--</p>
+                  <div class="tag-stack" id="engineer-fallback-tags"></div>
+                </article>
+              </div>
+
+              <div class="race-engineer-layout">
+                <section class="info-block">
+                  <div class="panel-title-row">
+                    <p class="panel-kicker">Assumptions</p>
+                    <span class="status-dot muted">Model + race context</span>
+                  </div>
+                  <ul id="engineer-assumptions" class="signal-list"></ul>
+                </section>
+                <section class="info-block">
+                  <div class="panel-title-row">
+                    <p class="panel-kicker">Lap-by-Lap Callouts</p>
+                    <span class="status-dot yellow">Pit wall guidance</span>
+                  </div>
+                  <ul id="engineer-callouts" class="signal-list"></ul>
+                </section>
+              </div>
+
+              <section class="info-block">
+                <div class="panel-title-row">
+                  <p class="panel-kicker">Sensitivity Map</p>
+                  <span class="status-dot">Decision pressure</span>
+                </div>
+                <div id="engineer-sensitivities" class="sensitivity-grid"></div>
+              </section>
+
+              <section class="info-block">
+                <div class="panel-title-row">
+                  <p class="panel-kicker">Scenario Comparison</p>
+                  <span class="status-dot yellow">Green / SC / Rain / Traffic</span>
+                </div>
+                <div id="scenario-compare-grid" class="scenario-compare-grid"></div>
+              </section>
+            </section>
           </div>
         </section>
 
@@ -336,6 +516,52 @@
               </section>
             </section>
           </div>
+        </section>
+
+        <section class="view" data-view="modellab">
+          <div class="view-header compact">
+            <div>
+              <p class="eyebrow">Training And Evaluation</p>
+              <h1>Model Lab</h1>
+              <p class="subtle-copy">Review trained proxy models, validation metrics, feature importance, and historical backtesting references.</p>
+            </div>
+          </div>
+
+          <section class="panel">
+            <div class="panel-title-row">
+              <p class="panel-kicker">Model Evaluation</p>
+              <span class="status-dot" id="model-lab-generated-at">Awaiting model load</span>
+            </div>
+            <div class="model-lab-toolbar">
+              <button id="run-model-lab" class="run-button" type="button">Run Model Lab</button>
+              <div class="panel simulation-status" id="model-lab-status">Click Run Model Lab to load training metrics, calibration, and backtesting.</div>
+            </div>
+            <div id="model-lab-cards" class="model-lab-grid"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-title-row">
+              <p class="panel-kicker">Historical Backtesting</p>
+              <span class="status-dot yellow">Prediction vs reference</span>
+            </div>
+            <div id="model-lab-calibration" class="calibration-grid"></div>
+            <div class="table-wrap">
+              <table class="archive-table">
+                <thead>
+                  <tr>
+                    <th>Year</th>
+                    <th>Grand Prix</th>
+                    <th>Driver</th>
+                    <th>Actual Lap</th>
+                    <th>Predicted Lap</th>
+                    <th>Error</th>
+                    <th>Stops</th>
+                  </tr>
+                </thead>
+                <tbody id="model-lab-backtest-body"></tbody>
+              </table>
+            </div>
+          </section>
         </section>
       </main>
     </div>

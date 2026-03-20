@@ -67,11 +67,13 @@ The optimizer now reacts to driver selection and surfaces result changes more cl
 </p>
 
 <br>
+<br>
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/0ceae334-eefc-4b99-8175-1f84894abaee" width="70%"/>
 </p>
 
+<br>
 <br>
 
 <p align="center">
@@ -79,10 +81,12 @@ The optimizer now reacts to driver selection and surfaces result changes more cl
 </p>
 
 <br>
+<br>
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/bbb313f8-f25c-454a-9bc7-60cd5b6d8178" width="90%"/>
 </p>
+<br>
 
 ## Features
 

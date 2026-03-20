@@ -38,16 +38,26 @@ The optimizer now reacts to driver selection and surfaces result changes more cl
 ## Project Structure
 
 ```text
-src/f1_strategy_engine/
-  api/          FastAPI routes
-  domain/       typed models
-  ml/           baseline ML hooks
-  optimizer/    strategy search and scoring
-  services/     history, optimization, simulation services
-  static/       dashboard frontend
-data/f1db/      historical CSV dataset
-docs/           architecture and product docs
-tests/          API and optimizer tests
+.
+├── src/
+│   └── f1_strategy_engine/
+│       ├── api/              # FastAPI routers
+│       ├── domain/           # Core data models & schemas
+│       ├── ml/               # ML pipelines & inference hooks
+│       ├── optimizer/        # Strategy optimization engine
+│       ├── services/         # Simulation, history & orchestration
+│       └── static/           # Frontend dashboard assets
+│
+├── data/
+│   └── f1db/                # Historical race datasets (CSV)
+│
+├── docs/                   # System design & architecture docs
+│
+├── tests/                  # Test suite (API, optimizer, ML)
+│
+├── requirements.txt        # Python dependencies
+├── README.md               # Project overview
+└── .gitignore
 ```
 
 ## Features

@@ -1,3 +1,31 @@
+## Project Preview
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/a49b5180-f873-4155-ad5b-024c3d0001bc" width="90%"/>
+</p>
+
+<br>
+<br>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/0ceae334-eefc-4b99-8175-1f84894abaee" width="70%"/>
+</p>
+
+<br>
+<br>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/3e6e7ef5-286b-4101-ac8c-2253b2bc352b" width="90%"/>
+</p>
+
+<br>
+<br>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/bbb313f8-f25c-454a-9bc7-60cd5b6d8178" width="90%"/>
+</p>
+<br>
+
 # F1 Strategy Engine
 
 An F1-inspired race strategy dashboard built for AIML and motorsport analytics work.
@@ -59,34 +87,6 @@ The optimizer now reacts to driver selection and surfaces result changes more cl
 ├── README.md               # Project overview
 └── .gitignore
 ```
-
-## Project Preview
-
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/a49b5180-f873-4155-ad5b-024c3d0001bc" width="90%"/>
-</p>
-
-<br>
-<br>
-
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/0ceae334-eefc-4b99-8175-1f84894abaee" width="70%"/>
-</p>
-
-<br>
-<br>
-
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/3e6e7ef5-286b-4101-ac8c-2253b2bc352b" width="90%"/>
-</p>
-
-<br>
-<br>
-
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/bbb313f8-f25c-454a-9bc7-60cd5b6d8178" width="90%"/>
-</p>
-<br>
 
 ## Features
 

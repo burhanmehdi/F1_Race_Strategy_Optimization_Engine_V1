@@ -1,0 +1,12 @@
+{
+  "current_lap": 18,
+  "total_laps": 57,
+  "current_compound": "MEDIUM",
+  "tire_age_laps": 12,
+  "pit_loss_seconds": 21.5,
+  "base_lap_time_seconds": 91.2,
+  "fuel_penalty_per_lap": 0.03,
+  "safety_car_probability": 0.18,
+  "degradation_per_lap": 0.09,
+  "compound_delta_seconds": 0.6
+}

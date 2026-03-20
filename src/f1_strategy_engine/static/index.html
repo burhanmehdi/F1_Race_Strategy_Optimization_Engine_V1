@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>F1 Strategy Engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-lockup">
+          <div class="brand-wordmark"><span>F1</span> Strategy Engine</div>
+          <div class="season-tag" id="season-tag">All-Time Platform</div>
+        </div>
+        <nav class="topnav" aria-label="Primary">
+          <button class="nav-pill active" data-tab="pitstops">Pit Stops</button>
+          <button class="nav-pill" data-tab="optimizer">Optimizer</button>
+          <button class="nav-pill" data-tab="simulation">Simulation</button>
+          <button class="nav-pill" data-tab="degradation">Degradation</button>
+          <button class="nav-pill" data-tab="archive">Race Archive</button>
+        </nav>
+      </header>
+
+      <main class="dashboard">
+        <section class="panel global-selector">
+          <div class="selector-copy">
+            <p class="eyebrow">Historic Race Control</p>
+            <h2>Analyze any F1 race from 2018 to now</h2>
+            <p class="subtle-copy">Selections here drive the pit board, optimizer defaults, simulation context, and archive detail views.</p>
+          </div>
+          <div class="selector-grid">
+            <label class="toolbar-field">
+              <span>Season</span>
+              <select id="global-season"></select>
+            </label>
+            <label class="toolbar-field">
+              <span>Grand Prix</span>
+              <select id="global-race"></select>
+            </label>
+            <label class="toolbar-field">
+              <span>Circuit</span>
+              <select id="global-circuit"></select>
+            </label>
+          </div>
+        </section>
+
+        <section class="view active" data-view="pitstops">
+          <div class="view-header">
+            <div>
+              <p class="eyebrow">Tyre Usage Board</p>
+              <h1 id="pitstop-title">Historic Pit Stops</h1>
+              <p class="subtle-copy" id="pitstop-subtitle">Select a season, race, and circuit to load strategy history.</p>
+            </div>
+            <div class="hero-metric">
+              <span class="metric-label">Total Pit Stops</span>
+              <span class="metric-value" id="pitstop-total">--</span>
+              <span class="metric-sub" id="pitstop-bias">Waiting for race data</span>
+            </div>
+          </div>
+
+          <div class="compound-filter">
+            <button class="compound-pill active" data-filter="ALL">All Compounds</button>
+            <button class="compound-pill" data-filter="HARD">Hard</button>
+            <button class="compound-pill" data-filter="MEDIUM">Medium</button>
+            <button class="compound-pill" data-filter="SOFT">Soft</button>
+          </div>
+
+          <section class="panel strategy-board-panel">
+            <div class="board-scale" id="board-scale"></div>
+            <div id="pitstop-board" class="pitstop-board"></div>
+            <div class="board-legend">
+              <span class="legend-tag hard">Hard</span>
+              <span class="legend-tag medium">Medium</span>
+              <span class="legend-tag soft">Soft</span>
+              <span class="legend-tag used">Used tyre</span>
+              <span class="legend-tag stop">Pit stop</span>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" data-view="optimizer">
+          <div class="view-header compact">
+            <div>
+              <p class="eyebrow">Strategy Command</p>
+              <h1>Optimizer</h1>
+              <p class="subtle-copy">The inputs are preloaded from the selected historical race and can be tuned before running a new strategy pass.</p>
+            </div>
+          </div>
+
+          <div class="grid-layout">
+            <section class="panel controls-panel">
+              <div class="panel-title-row">
+                <p class="panel-kicker">Optimizer Config</p>
+                <span class="status-chip" id="optimizer-status">Ready</span>
+              </div>
+
+              <form id="optimizer-form" class="control-form">
+                <label>
+                  <span>Driver</span>
+                  <select name="driver_code" id="optimizer-driver"></select>
+                </label>
+                <label><span>Current Lap</span><input type="number" name="current_lap" value="18" min="1" /></label>
+                <label><span>Total Laps</span><input type="number" name="total_laps" value="57" min="1" /></label>
+                <label>
+                  <span>Max Pit Stops</span>
+                  <select name="max_pit_stops">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Current Compound</span>
+                  <select name="current_compound">
+                    <option value="SOFT">Soft</option>
+                    <option value="MEDIUM" selected>Medium</option>
+                    <option value="HARD">Hard</option>
+                  </select>
+                </label>
+                <label><span>Tire Age</span><input type="number" name="tire_age_laps" value="12" min="0" /></label>
+                <label><span>Pit Loss (s)</span><input type="number" step="any" name="pit_loss_seconds" value="21.5" min="1" /></label>
+                <label><span>Base Lap Time (s)</span><input type="number" step="any" name="base_lap_time_seconds" value="91.2" min="1" /></label>
+                <label><span>Fuel Penalty / Lap</span><input type="number" step="any" name="fuel_penalty_per_lap" value="0.03" min="0" /></label>
+                <label>
+                  <span>Safety Car Probability</span>
+                  <input type="range" name="safety_car_probability" value="0.18" min="0" max="1" step="0.01" />
+                  <strong id="sc-probability">18%</strong>
+                </label>
+                <label><span>Degradation / Lap</span><input type="number" step="any" name="degradation_per_lap" value="0.09" min="0" /></label>
+                <label><span>Compound Delta</span><input type="number" step="any" name="compound_delta_seconds" value="0.6" min="0" /></label>
+                <button type="submit" class="run-button">Run Optimizer</button>
+              </form>
+            </section>
+
+            <section class="panel summary-panel" id="results-panel">
+              <div class="results-loading" id="results-loading" hidden>
+                <div class="spinner"></div>
+                <strong>Running strategy optimization</strong>
+                <span>Calculating pit windows, race-time deltas, and safety-car outcomes...</span>
+              </div>
+
+              <div class="result-hero">
+                <div>
+                  <span class="small-label">Optimized Strategy</span>
+                  <h2 id="recommended-name">Awaiting input</h2>
+                  <p id="recommended-explanation" class="recommendation-copy">Run the optimizer to populate your primary strategy recommendation.</p>
+                </div>
+                <div class="result-flags">
+                  <div class="result-flag primary-highlight"><span>Active Driver</span><strong id="hero-driver">--</strong></div>
+                  <div class="result-flag"><span>Win Probability</span><strong id="hero-win-probability">--</strong></div>
+                  <div class="result-flag"><span>Time Gain</span><strong id="hero-improvement">--</strong></div>
+                  <div class="result-flag"><span>Risk Level</span><strong id="hero-risk-level">--</strong></div>
+                </div>
+              </div>
+
+              <div class="change-banner" id="change-banner">
+                <div>
+                  <span class="small-label">Latest Result Signal</span>
+                  <strong id="change-headline">Waiting for first optimizer run</strong>
+                </div>
+                <div class="change-chips">
+                  <span class="change-chip" id="change-driver-chip">Driver delta --</span>
+                  <span class="change-chip" id="change-time-chip">Race time delta --</span>
+                  <span class="change-chip" id="change-plan-chip">Plan delta --</span>
+                </div>
+              </div>
+
+              <div class="summary-strip">
+                <article class="summary-card accent-red"><span>Expected Race Time</span><strong id="summary-time">--</strong></article>
+                <article class="summary-card accent-yellow"><span>Confidence</span><strong id="summary-confidence">--</strong></article>
+                <article class="summary-card accent-white"><span>Pit Stops</span><strong id="summary-stops">--</strong></article>
+              </div>
+
+              <div class="comparison-grid">
+                <article class="comparison-card">
+                  <span class="small-label">Baseline Before</span>
+                  <strong id="baseline-name">--</strong>
+                  <p id="baseline-time">--</p>
+                </article>
+                <article class="comparison-card emphasized">
+                  <span class="small-label">Optimized After</span>
+                  <strong id="optimized-time">--</strong>
+                  <p id="optimized-delta">--</p>
+                </article>
+              </div>
+
+              <div class="optimizer-ranked" id="optimizer-ranked"></div>
+
+              <div id="pit-stop-tags" class="pit-stop-tags"></div>
+
+              <div class="timeline-panel">
+                <div class="timeline-header">
+                  <span>Stint Timeline</span>
+                  <span id="timeline-caption">No plan loaded</span>
+                </div>
+                <div id="timeline-track" class="timeline-track"></div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" data-view="simulation">
+          <div class="view-header compact">
+            <div>
+              <p class="eyebrow">Outcome Distribution</p>
+              <h1>Simulation</h1>
+              <p class="subtle-copy">Explore the top strategies with scenario-oriented distributions and risk metrics.</p>
+            </div>
+            <div class="sim-toolbar">
+              <label class="toolbar-field">
+                <span>Driver</span>
+                <select id="sim-driver"></select>
+              </label>
+              <label class="toolbar-field">
+                <span>Simulations</span>
+                <input id="sim-count" type="range" min="1000" max="10000" step="500" value="5000" />
+                <strong id="sim-count-label">5,000</strong>
+              </label>
+              <label class="toolbar-field">
+                <span>Grid Position</span>
+                <input id="grid-position" type="range" min="1" max="20" step="1" value="5" />
+                <strong id="grid-position-label">P5</strong>
+              </label>
+              <button id="run-simulation" class="run-button simulation-button" type="button">Run Simulation</button>
+            </div>
+          </div>
+
+          <div class="panel simulation-status" id="simulation-status">Run simulation to generate Monte Carlo outcome cards.</div>
+          <section class="simulation-grid" id="simulation-grid"></section>
+        </section>
+
+        <section class="view" data-view="degradation">
+          <div class="view-header compact">
+            <div>
+              <p class="eyebrow">Compound Performance</p>
+              <h1>Tyre Degradation</h1>
+              <p class="subtle-copy">Curve views update from the selected race metadata and current strategy inputs.</p>
+            </div>
+          </div>
+
+          <section class="panel degradation-panel">
+            <div class="panel-title-row">
+              <p class="panel-kicker">Tyre Degradation View</p>
+              <span class="status-dot yellow" id="degradation-bias">Heuristic Model</span>
+            </div>
+            <div class="degradation-legend">
+              <span class="legend-item hard">Hard</span>
+              <span class="legend-item medium">Medium</span>
+              <span class="legend-item soft">Soft</span>
+            </div>
+            <svg id="degradation-chart" viewBox="0 0 640 260" class="degradation-chart" aria-label="Tyre degradation chart">
+              <g class="grid"></g>
+              <g class="lines"></g>
+              <g class="markers"></g>
+            </svg>
+            <div class="degradation-foot">
+              <span id="degradation-note">Medium is the selected current compound.</span>
+            </div>
+          </section>
+
+          <section class="degradation-specs" id="degradation-specs"></section>
+        </section>
+
+        <section class="view" data-view="archive">
+          <div class="view-header">
+            <div>
+              <p class="eyebrow">Training Data Context</p>
+              <h1>Race Archive</h1>
+              <p class="subtle-copy">Browse all available races from 2018-2024 and use the metadata as model context for strategic decisions.</p>
+            </div>
+            <div class="hero-metric">
+              <span class="metric-label">Archive Rows</span>
+              <span class="metric-value" id="archive-count">0</span>
+              <span class="metric-sub">Seasons, circuits, races, strategy notes</span>
+            </div>
+          </div>
+
+          <div class="archive-toolbar">
+            <label class="toolbar-field"><span>Season</span><select id="archive-season-filter"></select></label>
+            <label class="toolbar-field"><span>Circuit</span><select id="archive-circuit-filter"></select></label>
+            <label class="toolbar-field search-field"><span>Search</span><input id="archive-search" type="search" placeholder="GP, circuit, country..." /></label>
+          </div>
+
+          <div class="archive-layout">
+            <section class="panel archive-table-panel">
+              <div class="panel-title-row">
+                <p class="panel-kicker">Historic Race Set</p>
+                <span class="status-dot">Backend Catalog</span>
+              </div>
+              <div class="table-wrap">
+                <table class="archive-table">
+                  <thead>
+                    <tr>
+                      <th>Year</th>
+                      <th>Round</th>
+                      <th>Grand Prix</th>
+                      <th>Circuit</th>
+                      <th>Country</th>
+                    </tr>
+                  </thead>
+                  <tbody id="archive-table-body"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="archive-side">
+              <section class="panel archive-insight-panel">
+                <div class="panel-title-row">
+                  <p class="panel-kicker">Selected Race Insight</p>
+                  <span class="status-dot muted">Reference View</span>
+                </div>
+                <div id="archive-detail" class="archive-detail"></div>
+              </section>
+
+              <section class="panel archive-feature-panel">
+                <div class="panel-title-row">
+                  <p class="panel-kicker">Suggested Model Features</p>
+                  <span class="status-dot yellow">ML Hooks</span>
+                </div>
+                <div class="feature-list">
+                  <div class="feature-chip">driver_form</div>
+                  <div class="feature-chip">grid_position</div>
+                  <div class="feature-chip">circuit_profile</div>
+                  <div class="feature-chip">pit_loss_seconds</div>
+                  <div class="feature-chip">initial_compound</div>
+                  <div class="feature-chip">stint_length_1</div>
+                  <div class="feature-chip">stint_length_2</div>
+                  <div class="feature-chip">safety_car_probability</div>
+                  <div class="feature-chip">degradation_per_lap</div>
+                  <div class="feature-chip">weather_risk</div>
+                </div>
+              </section>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

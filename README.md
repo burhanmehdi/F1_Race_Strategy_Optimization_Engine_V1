@@ -72,23 +72,66 @@ The optimizer now reacts to driver selection and surfaces result changes more cl
 .
 ├── src/
 │   └── f1_strategy_engine/
-│       ├── api/              # FastAPI routers
-│       ├── domain/           # Core data models & schemas
-│       ├── ml/               # ML pipelines & inference hooks
-│       ├── optimizer/        # Strategy optimization engine
-│       ├── services/         # Simulation, history & orchestration
-│       └── static/           # Frontend dashboard assets
+│       ├── __init__.py
+│       ├── api/
+│       │   └── main.py                  # FastAPI routes
+│       ├── domain/
+│       │   └── models.py                # Core schemas and typed models
+│       ├── ml/
+│       │   └── baseline.py              # Baseline ML logic
+│       ├── optimizer/
+│       │   └── engine.py                # Strategy optimization engine
+│       ├── services/
+│       │   ├── history_service.py       # Historical CSV data layer
+│       │   ├── model_lab_service.py     # Model training/evaluation service
+│       │   ├── race_engineer_service.py # Race Engineer logic
+│       │   ├── simulation_service.py    # Monte Carlo simulation
+│       │   └── strategy_service.py      # Strategy orchestration
+│       └── static/
+│           ├── app.js                   # Frontend logic
+│           ├── index.html               # Dashboard UI
+│           └── styles.css               # Dashboard styling
 │
 ├── data/
-│   └── f1db/                # Historical race datasets (CSV)
+│   └── f1db/                            # Historical F1 CSV dataset
+│       ├── f1db-races.csv
+│       ├── f1db-races-pit-stops.csv
+│       ├── f1db-races-race-results.csv
+│       ├── f1db-drivers.csv
+│       ├── f1db-circuits.csv
+│       └── ... many other F1DB CSV files
 │
-├── docs/                   # System design & architecture docs
+├── assets/
+│   └── screenshots/
+│       ├── dashboard-preview.svg
+│       ├── optimizer-preview.svg
+│       └── race-engineer-preview.svg
 │
-├── tests/                  # Test suite (API, optimizer, ML)
+├── artifacts/
+│   └── model_lab.pkl                    # Saved model artifact
 │
-├── requirements.txt        # Python dependencies
-├── README.md               # Project overview
+├── docs/
+│   ├── architecture.md
+│   ├── mvp_backlog.md
+│   └── product_brief.md
+│
+├── examples/
+│   └── sample_optimize_request.json
+│
+├── scripts/
+│   └── train_model_lab.py               # Training script
+│
+├── tests/
+│   ├── conftest.py
+│   ├── test_dashboard.py
+│   └── test_optimizer.py
+│
+├── requirements.txt
+├── README.md
+├── run_dashboard.py
+├── start_dashboard.bat
 └── .gitignore
+
 ```
 
 ## Features

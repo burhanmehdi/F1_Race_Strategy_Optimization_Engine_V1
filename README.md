@@ -157,26 +157,6 @@ Install dev extras once, then run pytest:
 .venv\Scripts\python.exe -m pytest -q
 ```
 
----
-
-## Deploy on Vercel
-
-Deploy as a **FastAPI** Python project ([FastAPI on Vercel](https://vercel.com/docs/frameworks/backend/fastapi)).
-
-1. Push this repo to GitHub (e.g. [F1_Race_Strategy_Optimization_Engine_V1](https://github.com/burhanmehdi/F1_Race_Strategy_Optimization_Engine_V1)).
-2. [Vercel → New Project](https://vercel.com/new) → import the repository.
-3. **Root directory**: repository root (`.`).
-4. Deploy; verify **`/health`** on the production URL.
-
-**Details**
-
-- Root **`main.py` / `index.py` / `app.py`** prepend `src/` to `sys.path` so the app resolves during build (same idea as the official [Vercel FastAPI example](https://github.com/vercel/vercel/tree/main/examples/fastapi)).
-- **`pyproject.toml`**: `[project.scripts] app = "f1_strategy_engine.api.main:app"` and `[tool.vercel.scripts] build = "python scripts/train_model_lab.py"` to generate `artifacts/model_lab.pkl` at build time (artifact remains gitignored but is included in the deployment output).
-- **WebSockets** (`/ws/live-race`) may be limited on serverless; prefer **`POST /api/live-race`** for previews in production.
-- If cold starts time out, raise the **function max duration** in the Vercel project settings.
-
----
-
 ## Documentation
 
 - [Product brief](docs/product_brief.md)

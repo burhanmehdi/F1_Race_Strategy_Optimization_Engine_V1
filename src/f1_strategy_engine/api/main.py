@@ -1,15 +1,20 @@
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from f1_strategy_engine.domain.models import (
+    BacktestSummary,
     DriverInfo,
     HistoricalRaceCatalog,
     HistoricalRaceDetail,
+    LiveProviderCatalog,
+    LiveRaceRequest,
+    LiveRaceSnapshot,
     ModelLabResponse,
     RaceState,
     RaceEngineerRequest,
@@ -20,6 +25,8 @@ from f1_strategy_engine.domain.models import (
     StrategyRecommendation,
 )
 from f1_strategy_engine.services.history_service import HistoricalDataService
+from f1_strategy_engine.services.data_platform_service import DataPlatformService
+from f1_strategy_engine.services.live_race_service import LiveRaceService
 from f1_strategy_engine.services.model_lab_service import ModelLabService
 from f1_strategy_engine.services.race_engineer_service import RaceEngineerService
 from f1_strategy_engine.services.simulation_service import SimulationService
@@ -29,11 +36,17 @@ app = FastAPI(title="F1 Race Strategy Optimization Engine", version="0.1.0")
 strategy_service = StrategyService()
 simulation_service = SimulationService(strategy_service=strategy_service)
 historical_data_service = HistoricalDataService()
+data_platform_service = DataPlatformService()
 model_lab_service = ModelLabService(history_service=historical_data_service)
 race_engineer_service = RaceEngineerService(
     strategy_service=strategy_service,
     history_service=historical_data_service,
     model_lab_service=model_lab_service,
+)
+live_race_service = LiveRaceService(
+    history_service=historical_data_service,
+    model_lab_service=model_lab_service,
+    race_engineer_service=race_engineer_service,
 )
 BASE_DIR = Path(__file__).resolve().parents[1]
 STATIC_DIR = BASE_DIR / "static"
@@ -49,6 +62,18 @@ def dashboard() -> FileResponse:
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/api/platform")
+def get_platform() -> dict[str, str | bool]:
+    summary = data_platform_service.platform_summary()
+    summary["live_provider"] = live_race_service.provider_name()
+    return summary
+
+
+@app.get("/api/live/providers", response_model=LiveProviderCatalog)
+def get_live_providers() -> LiveProviderCatalog:
+    return live_race_service.provider_summary()
 
 
 @app.post("/optimize", response_model=StrategyRecommendation)
@@ -95,3 +120,43 @@ def get_current_drivers() -> list[DriverInfo]:
 @app.get("/api/model-lab", response_model=ModelLabResponse)
 def get_model_lab() -> ModelLabResponse:
     return model_lab_service.get_model_lab()
+
+
+@app.get("/api/model-lab/backtest-summary", response_model=list[BacktestSummary])
+def get_model_lab_backtest_summary() -> list[BacktestSummary]:
+    return model_lab_service.get_model_lab().backtest_summary
+
+
+@app.post("/api/live-race", response_model=list[LiveRaceSnapshot])
+def get_live_race_preview(request: LiveRaceRequest) -> list[LiveRaceSnapshot]:
+    return live_race_service.build_stream(request)
+
+
+@app.websocket("/ws/live-race")
+async def live_race_stream(
+    websocket: WebSocket,
+    race_id: str,
+    driver_code: str,
+    start_lap: int = 1,
+    sample_size: int = 8,
+) -> None:
+    await websocket.accept()
+    try:
+        stream = live_race_service.build_stream(
+            LiveRaceRequest(
+                race_id=race_id,
+                driver_code=driver_code,
+                start_lap=start_lap,
+                sample_size=sample_size,
+            )
+        )
+        for snapshot in stream:
+            await websocket.send_json(snapshot.model_dump(mode="json"))
+            await asyncio.sleep(0.6)
+        await websocket.send_json({"event": "complete"})
+    except WebSocketDisconnect:
+        return
+    except Exception as exc:  # pragma: no cover
+        await websocket.send_json({"event": "error", "detail": str(exc)})
+    finally:
+        await websocket.close()

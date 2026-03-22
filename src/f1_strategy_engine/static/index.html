@@ -17,6 +17,7 @@
           <div class="season-tag" id="season-tag">All-Time Platform</div>
         </div>
         <nav class="topnav" aria-label="Primary">
+          <button class="nav-pill" data-tab="live">Live Race</button>
           <button class="nav-pill" data-tab="raceengineer">Race Engineer</button>
           <button class="nav-pill active" data-tab="pitstops">Pit Stops</button>
           <button class="nav-pill" data-tab="optimizer">Optimizer</button>
@@ -102,6 +103,122 @@
                 <span></span><span></span><span></span><span></span><span></span>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section class="view" data-view="live">
+          <div class="view-header compact">
+            <div>
+              <p class="eyebrow">Live Race Wall</p>
+              <h1>Live Strategy Mode</h1>
+              <p class="subtle-copy">Stream lap-by-lap telemetry context, pit-window calls, rival reactions, and explainable strategy changes through a WebSocket feed.</p>
+            </div>
+          </div>
+
+          <div class="grid-layout">
+            <section class="panel controls-panel">
+              <div class="panel-title-row">
+                <p class="panel-kicker">Live Feed Config</p>
+                <span class="status-chip" id="live-status-chip">Idle</span>
+              </div>
+              <div class="panel simulation-status" id="live-race-status">Choose a driver and click Start Live Feed.</div>
+              <div class="control-form">
+                <label>
+                  <span>Driver</span>
+                  <select id="live-driver"></select>
+                </label>
+                <label>
+                  <span>Provider</span>
+                  <input id="live-provider-name" type="text" value="historical-replay" readonly />
+                </label>
+                <label>
+                  <span>Start Lap</span>
+                  <input id="live-start-lap" type="number" min="1" value="14" />
+                </label>
+                <label>
+                  <span>Samples</span>
+                  <input id="live-sample-size" type="range" min="4" max="12" step="1" value="8" />
+                  <strong id="live-sample-size-label">8 snapshots</strong>
+                </label>
+                <button id="start-live-race" class="run-button" type="button">Start Live Feed</button>
+              </div>
+            </section>
+
+            <section class="panel summary-panel">
+              <div class="result-hero live-hero">
+                <div>
+                  <span class="small-label">Current Call</span>
+                  <h2 id="live-headline">Awaiting live strategy stream</h2>
+                  <p id="live-subheadline" class="recommendation-copy">The feed will update with telemetry-aware pit decisions, tyre cliff detection, and scenario triggers.</p>
+                </div>
+                <div class="result-flags">
+                  <div class="result-flag primary-highlight"><span>Action</span><strong id="live-action">--</strong></div>
+                  <div class="result-flag"><span>Lap</span><strong id="live-lap">--</strong></div>
+                  <div class="result-flag"><span>Confidence</span><strong id="live-confidence">--</strong></div>
+                  <div class="result-flag"><span>Plan B</span><strong id="live-plan-b">--</strong></div>
+                </div>
+              </div>
+
+              <div class="comparison-grid live-decision-grid">
+                <article class="comparison-card emphasized">
+                  <span class="small-label">Undercut Gain</span>
+                  <strong id="live-undercut">--</strong>
+                  <p>Projected gain if we pit now.</p>
+                </article>
+                <article class="comparison-card">
+                  <span class="small-label">Traffic Loss</span>
+                  <strong id="live-traffic-loss">--</strong>
+                  <p>Estimated loss at pit exit.</p>
+                </article>
+                <article class="comparison-card">
+                  <span class="small-label">Tyre Cliff</span>
+                  <strong id="live-tyre-cliff">--</strong>
+                  <p>Stint drop-off risk.</p>
+                </article>
+              </div>
+
+              <div class="live-grid">
+                <section class="info-block">
+                  <div class="panel-title-row">
+                    <p class="panel-kicker">Telemetry Snapshot</p>
+                    <span class="status-dot">Live feed</span>
+                  </div>
+                  <div id="live-telemetry-grid" class="live-telemetry-grid"></div>
+                </section>
+                <section class="info-block">
+                  <div class="panel-title-row">
+                    <p class="panel-kicker">Why The Call Changed</p>
+                    <span class="status-dot yellow">Explainability</span>
+                  </div>
+                  <ul id="live-reasons" class="signal-list"></ul>
+                </section>
+              </div>
+
+              <div class="live-grid">
+                <section class="info-block">
+                  <div class="panel-title-row">
+                    <p class="panel-kicker">Weather Feed</p>
+                    <span class="status-dot muted">Nowcast</span>
+                  </div>
+                  <div id="live-weather-grid" class="live-telemetry-grid"></div>
+                </section>
+                <section class="info-block">
+                  <div class="panel-title-row">
+                    <p class="panel-kicker">Live Event Log</p>
+                    <span class="status-dot yellow">Timing / Pit / Control</span>
+                  </div>
+                  <ul id="live-event-log" class="signal-list"></ul>
+                </section>
+              </div>
+
+              <section class="info-block">
+                <div class="panel-title-row">
+                  <p class="panel-kicker">Scenario Notes</p>
+                  <span class="status-dot muted">Engineer prompts</span>
+                </div>
+                <ul id="live-scenario-notes" class="signal-list"></ul>
+              </section>
+            </section>
           </div>
         </section>
 

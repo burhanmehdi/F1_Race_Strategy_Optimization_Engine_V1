@@ -1257,6 +1257,38 @@ label strong { color: var(--yellow); }
   margin-bottom: 16px;
 }
 
+.live-grid,
+.live-telemetry-grid,
+.live-decision-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.live-grid {
+  grid-template-columns: 1.15fr 1fr;
+}
+
+.live-telemetry-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.live-hero {
+  background:
+    linear-gradient(180deg, rgba(255, 18, 55, 0.08), rgba(255, 18, 55, 0.02)),
+    linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0));
+}
+
+.live-decision-grid .comparison-card strong {
+  display: block;
+  margin-top: 10px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 2rem;
+}
+
+.summary-row strong {
+  color: var(--yellow);
+}
+
 .optimizer-plan-card {
   padding: 16px;
   border-radius: 16px;
@@ -1279,6 +1311,8 @@ label strong { color: var(--yellow); }
   .global-selector,
   .context-compact,
   .race-feature-metrics,
+  .live-grid,
+  .live-telemetry-grid,
   .grid-layout,
   .archive-layout,
   .selector-grid,

@@ -26,6 +26,26 @@ def test_catalog_endpoint_returns_historical_races() -> None:
     assert any(race["circuit"] == "Lusail" for race in payload["races"])
 
 
+def test_platform_endpoint_reports_backend_and_live_provider() -> None:
+    client = TestClient(app)
+    response = client.get("/api/platform")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["engine"] in {"duckdb", "pandas-fallback"}
+    assert payload["live_provider"] == "historical-replay"
+
+
+def test_live_provider_catalog_endpoint_returns_blueprints() -> None:
+    client = TestClient(app)
+    response = client.get("/api/live/providers")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["active_provider"] == "historical-replay"
+    assert any(item["provider_name"] == "external-timing-blueprint" for item in payload["available_providers"])
+
+
 def test_race_detail_endpoint_returns_selected_race() -> None:
     client = TestClient(app)
     catalog = client.get("/api/catalog").json()
@@ -87,9 +107,41 @@ def test_model_lab_endpoint_returns_metrics() -> None:
     payload = response.json()
     assert payload["models"]
     assert any(model["model_id"] == "lap_time" for model in payload["models"])
+    assert any(model["version"] == "v2.1" for model in payload["models"])
     assert payload["backtest"]
     assert payload["calibration"]
     assert payload["summary"]
+    assert payload["backtest_summary"]
+
+
+def test_live_race_preview_endpoint_returns_snapshots() -> None:
+    client = TestClient(app)
+    catalog = client.get("/api/catalog").json()
+    race_id = catalog["races"][0]["race_id"]
+    response = client.post(
+        "/api/live-race",
+        json={
+            "race_id": race_id,
+            "driver_code": "VER",
+            "start_lap": 14,
+            "sample_size": 6,
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert len(payload) == 6
+    assert payload[0]["recommendation"]["action"] in {"BOX THIS LAP", "STAY OUT"}
+    assert payload[0]["recommendation"]["reasons"]
+
+
+def test_live_race_websocket_streams_updates() -> None:
+    client = TestClient(app)
+    with client.websocket_connect("/ws/live-race?race_id=1046&driver_code=VER&start_lap=14&sample_size=4") as websocket:
+        first = websocket.receive_json()
+        assert first["driver_code"] == "VER"
+        assert "telemetry" in first
+        assert "recommendation" in first
 
 
 def test_race_engineer_endpoint_returns_primary_and_fallback() -> None:

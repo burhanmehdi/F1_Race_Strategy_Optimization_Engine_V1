@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import pickle
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from functools import cached_property
 from pathlib import Path
-import pickle
 from typing import Any
 
 import numpy as np
@@ -12,6 +12,7 @@ import pandas as pd
 
 from f1_strategy_engine.domain.models import (
     BacktestRaceResult,
+    BacktestSummary,
     CalibrationBin,
     FeatureImportance,
     ModelLabResponse,
@@ -38,6 +39,7 @@ class ModelLabService:
             backtest=package["backtest_rows"],
             calibration=package["calibration_bins"],
             summary=package["summary"],
+            backtest_summary=package["backtest_summary"],
         )
 
     def predict_push_lap_time(
@@ -85,13 +87,17 @@ class ModelLabService:
         if self.artifact_path.exists():
             with self.artifact_path.open("rb") as handle:
                 package = pickle.load(handle)
-            if "calibration_bins" in package and "summary" in package:
+            if "calibration_bins" in package and "summary" in package and "backtest_summary" in package:
                 return package
 
         package = self._train_models()
         self.artifact_path.parent.mkdir(parents=True, exist_ok=True)
-        with self.artifact_path.open("wb") as handle:
-            pickle.dump(package, handle)
+        try:
+            with self.artifact_path.open("wb") as handle:
+                pickle.dump(package, handle)
+        except OSError:
+            # Serverless filesystems are often read-only except /tmp; still return trained package.
+            pass
         return package
 
     def _train_models(self) -> dict[str, Any]:
@@ -189,6 +195,7 @@ class ModelLabService:
             "backtest_rows": lap_bundle["backtest_rows"],
             "calibration_bins": self._calibration_bins(lap_bundle["backtest_frame"]),
             "summary": self._build_summary([lap_bundle["card"], pit_bundle["card"], degradation_bundle["card"], safety_bundle["card"]]),
+            "backtest_summary": self._build_backtest_summary(lap_bundle["backtest_frame"]),
         }
 
     def _fit_linear_bundle(
@@ -269,6 +276,7 @@ class ModelLabService:
             title=title,
             target=target_label,
             algorithm="RegularizedLinearRegression",
+            version="v2.1",
             sample_count=len(dataset),
             mae=round(mae, 3),
             rmse=round(rmse, 3),
@@ -560,3 +568,28 @@ class ModelLabService:
                 f"Lap time proxy is running at R2 {lap_model.r2:.3f}, which is good enough for scenario ranking but still short of telemetry-grade forecasting."
             )
         return summary
+
+    def _build_backtest_summary(self, frame: pd.DataFrame) -> list[BacktestSummary]:
+        if frame.empty:
+            return [BacktestSummary(label="Backtesting", value="N/A", description="No held-out race rows available.")]
+        errors = (frame["predicted"] - frame["actual"]).abs()
+        mean_error = float(errors.mean())
+        p90_error = float(np.percentile(errors, 90))
+        bias = float((frame["predicted"] - frame["actual"]).mean())
+        return [
+            BacktestSummary(
+                label="MAE",
+                value=f"{mean_error:.3f}s",
+                description="Average lap-time error on held-out historical races.",
+            ),
+            BacktestSummary(
+                label="P90 Error",
+                value=f"{p90_error:.3f}s",
+                description="Tail-risk band showing how the model behaves on tougher race contexts.",
+            ),
+            BacktestSummary(
+                label="Bias",
+                value=f"{bias:+.3f}s",
+                description="Average prediction bias; closer to zero is better calibrated.",
+            ),
+        ]

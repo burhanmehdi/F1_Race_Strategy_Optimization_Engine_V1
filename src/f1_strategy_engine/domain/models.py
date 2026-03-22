@@ -160,6 +160,7 @@ class ModelMetricCard(BaseModel):
     title: str
     target: str
     algorithm: str
+    version: str = "v1"
     sample_count: int = Field(..., ge=0)
     mae: float = Field(..., ge=0)
     rmse: float = Field(..., ge=0)
@@ -186,6 +187,7 @@ class ModelLabResponse(BaseModel):
     backtest: List[BacktestRaceResult]
     calibration: List["CalibrationBin"]
     summary: List[str]
+    backtest_summary: List["BacktestSummary"]
 
 
 class RaceEngineerRequest(BaseModel):
@@ -253,3 +255,88 @@ class ScenarioComparisonResponse(BaseModel):
     driver_code: str
     race_id: str | None = None
     scenarios: List[ScenarioComparisonItem]
+
+
+class BacktestSummary(BaseModel):
+    label: str
+    value: str
+    description: str
+
+
+class LiveRaceRequest(BaseModel):
+    race_id: str
+    driver_code: str
+    start_lap: int = Field(default=1, ge=1)
+    sample_size: int = Field(default=8, ge=4, le=20)
+    provider_name: str | None = None
+
+
+class LiveTelemetryPoint(BaseModel):
+    lap: int = Field(..., ge=1)
+    sector_1_seconds: float = Field(default=0, ge=0)
+    sector_2_seconds: float = Field(default=0, ge=0)
+    sector_3_seconds: float = Field(default=0, ge=0)
+    gap_ahead_seconds: float = Field(..., ge=0)
+    gap_behind_seconds: float = Field(..., ge=0)
+    last_lap_seconds: float = Field(..., ge=0)
+    tyre_age_laps: int = Field(..., ge=0)
+    fuel_load_index: float = Field(..., ge=0)
+    traffic_index: float = Field(..., ge=0)
+    weather_risk: float = Field(..., ge=0, le=1)
+    safety_car_probability: float = Field(..., ge=0, le=1)
+    rival_pitted: bool = False
+    vsc_active: bool = False
+
+
+class LiveWeatherPoint(BaseModel):
+    air_temperature_c: float
+    track_temperature_c: float
+    rain_probability: float = Field(..., ge=0, le=1)
+    humidity: float = Field(..., ge=0, le=1)
+    wind_speed_kph: float = Field(..., ge=0)
+    condition: str
+
+
+class LiveRaceEvent(BaseModel):
+    lap: int = Field(..., ge=1)
+    category: str
+    title: str
+    detail: str
+    impact: str
+
+
+class LiveDecisionRecommendation(BaseModel):
+    headline: str
+    action: str
+    confidence: float = Field(..., ge=0, le=1)
+    pit_window_start: int = Field(..., ge=1)
+    pit_window_end: int = Field(..., ge=1)
+    undercut_gain_seconds: float
+    overcut_risk_seconds: float
+    traffic_loss_seconds: float
+    tyre_cliff_risk: str
+    plan_b_trigger: str
+    reasons: List[str]
+
+
+class LiveRaceSnapshot(BaseModel):
+    race_id: str
+    driver_code: str
+    telemetry: LiveTelemetryPoint
+    weather: LiveWeatherPoint
+    events: List[LiveRaceEvent]
+    recommendation: LiveDecisionRecommendation
+    scenario_notes: List[str]
+
+
+class LiveProviderDescriptor(BaseModel):
+    provider_name: str
+    provider_mode: str
+    status: str
+    description: str
+
+
+class LiveProviderCatalog(BaseModel):
+    active_provider: str
+    mode: str
+    available_providers: List[LiveProviderDescriptor]

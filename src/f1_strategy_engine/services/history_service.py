@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from f1_strategy_engine.services.data_platform_service import DataPlatformService
 from f1_strategy_engine.domain.models import (
     DriverInfo,
     HistoricalPitStopRow,
@@ -24,8 +25,50 @@ MIN_SUPPORTED_SEASON = 2018
 @dataclass(frozen=True)
 class HistoricalDataService:
     data_dir: Path = field(default=DATA_DIR)
+    data_platform: DataPlatformService = field(default_factory=DataPlatformService)
 
     def list_current_drivers(self) -> list[DriverInfo]:
+        if self.data_platform.backend_name() == "duckdb":
+            rows = self.data_platform.query(
+                """
+                WITH latest_round AS (
+                  SELECT MAX(year) AS latest_year FROM race_results
+                ),
+                round_pick AS (
+                  SELECT year, MAX(round) AS latest_round
+                  FROM race_results
+                  WHERE year = (SELECT latest_year FROM latest_round)
+                  GROUP BY year
+                ),
+                latest_grid AS (
+                  SELECT rr.driverId, rr.constructorId, rr.gridPositionNumber
+                  FROM race_results rr
+                  JOIN round_pick rp
+                    ON rr.year = rp.year AND rr.round = rp.latest_round
+                  WHERE COALESCE(rr.gridPositionNumber, 99) <= 20
+                )
+                SELECT DISTINCT
+                  d.abbreviation AS code,
+                  d.fullName AS name,
+                  c.name AS team,
+                  lg.gridPositionNumber
+                FROM latest_grid lg
+                LEFT JOIN drivers d ON lg.driverId = d.id
+                LEFT JOIN constructors c ON lg.constructorId = c.id
+                ORDER BY lg.gridPositionNumber
+                LIMIT 20
+                """,
+                views={
+                    "race_results": "f1db-races-race-results.csv",
+                    "drivers": "f1db-drivers.csv",
+                    "constructors": "f1db-constructors.csv",
+                },
+            )
+            return [
+                DriverInfo(code=row["code"], name=row["name"], team=row["team"])
+                for _, row in rows.iterrows()
+            ]
+
         results = self.race_results
         latest_year = int(results["year"].max())
         latest_round = int(results.loc[results["year"] == latest_year, "round"].max())
@@ -129,6 +172,39 @@ class HistoricalDataService:
 
     @cached_property
     def races_enriched(self) -> pd.DataFrame:
+        if self.data_platform.backend_name() == "duckdb":
+            races = self.data_platform.query(
+                f"""
+                SELECT
+                  r.id AS raceId,
+                  r.year,
+                  r.round,
+                  r.circuitId,
+                  r.grandPrixId,
+                  r.date,
+                  r.laps,
+                  r.distance,
+                  r.courseLength,
+                  r.turns,
+                  COALESCE(gp.shortName, r.officialName) AS grandPrixName,
+                  COALESCE(c.placeName, c.fullName) AS circuitName,
+                  country.name AS countryName,
+                  c.type AS circuitType
+                FROM races r
+                LEFT JOIN grands_prix gp ON r.grandPrixId = gp.id
+                LEFT JOIN circuits c ON r.circuitId = c.id
+                LEFT JOIN countries country ON c.countryId = country.id
+                WHERE r.year >= {MIN_SUPPORTED_SEASON}
+                """,
+                views={
+                    "races": "f1db-races.csv",
+                    "grands_prix": "f1db-grands-prix.csv",
+                    "circuits": "f1db-circuits.csv",
+                    "countries": "f1db-countries.csv",
+                },
+            )
+            return races
+
         races = self.races.merge(
             self.grands_prix[["id", "shortName"]].rename(columns={"id": "grandPrixKey"}),
             left_on="grandPrixId",
@@ -155,15 +231,15 @@ class HistoricalDataService:
 
     @cached_property
     def races(self) -> pd.DataFrame:
-        return pd.read_csv(self.data_dir / "f1db-races.csv")
+        return self.data_platform.read_table("f1db-races.csv")
 
     @cached_property
     def pit_stops(self) -> pd.DataFrame:
-        return pd.read_csv(self.data_dir / "f1db-races-pit-stops.csv")
+        return self.data_platform.read_table("f1db-races-pit-stops.csv")
 
     @cached_property
     def race_results(self) -> pd.DataFrame:
-        results = pd.read_csv(self.data_dir / "f1db-races-race-results.csv", low_memory=False)
+        results = self.data_platform.read_table("f1db-races-race-results.csv")
         return results.merge(
             self.drivers[["id", "abbreviation", "fullName"]],
             left_on="driverId",
@@ -173,23 +249,23 @@ class HistoricalDataService:
 
     @cached_property
     def drivers(self) -> pd.DataFrame:
-        return pd.read_csv(self.data_dir / "f1db-drivers.csv")
+        return self.data_platform.read_table("f1db-drivers.csv")
 
     @cached_property
     def constructors(self) -> pd.DataFrame:
-        return pd.read_csv(self.data_dir / "f1db-constructors.csv")
+        return self.data_platform.read_table("f1db-constructors.csv")
 
     @cached_property
     def circuits(self) -> pd.DataFrame:
-        return pd.read_csv(self.data_dir / "f1db-circuits.csv")
+        return self.data_platform.read_table("f1db-circuits.csv")
 
     @cached_property
     def grands_prix(self) -> pd.DataFrame:
-        return pd.read_csv(self.data_dir / "f1db-grands-prix.csv")
+        return self.data_platform.read_table("f1db-grands-prix.csv")
 
     @cached_property
     def countries(self) -> pd.DataFrame:
-        return pd.read_csv(self.data_dir / "f1db-countries.csv")
+        return self.data_platform.read_table("f1db-countries.csv")
 
     def _race_summaries(self) -> list[HistoricalRaceSummary]:
         races = self.races_enriched.sort_values(["year", "round"])

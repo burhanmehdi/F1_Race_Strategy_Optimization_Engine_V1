@@ -17,6 +17,28 @@ const contextTrackBias = document.getElementById("context-track-bias");
 const contextTrackPitloss = document.getElementById("context-track-pitloss");
 const contextTrackSc = document.getElementById("context-track-sc");
 const contextTrackOvertake = document.getElementById("context-track-overtake");
+const liveDriver = document.getElementById("live-driver");
+const liveProviderName = document.getElementById("live-provider-name");
+const liveStartLap = document.getElementById("live-start-lap");
+const liveSampleSize = document.getElementById("live-sample-size");
+const liveSampleSizeLabel = document.getElementById("live-sample-size-label");
+const startLiveRaceButton = document.getElementById("start-live-race");
+const liveRaceStatus = document.getElementById("live-race-status");
+const liveStatusChip = document.getElementById("live-status-chip");
+const liveHeadline = document.getElementById("live-headline");
+const liveSubheadline = document.getElementById("live-subheadline");
+const liveAction = document.getElementById("live-action");
+const liveLap = document.getElementById("live-lap");
+const liveConfidence = document.getElementById("live-confidence");
+const livePlanB = document.getElementById("live-plan-b");
+const liveUndercut = document.getElementById("live-undercut");
+const liveTrafficLoss = document.getElementById("live-traffic-loss");
+const liveTyreCliff = document.getElementById("live-tyre-cliff");
+const liveTelemetryGrid = document.getElementById("live-telemetry-grid");
+const liveWeatherGrid = document.getElementById("live-weather-grid");
+const liveEventLog = document.getElementById("live-event-log");
+const liveReasons = document.getElementById("live-reasons");
+const liveScenarioNotes = document.getElementById("live-scenario-notes");
 
 const summaryTime = document.getElementById("summary-time");
 const summaryConfidence = document.getElementById("summary-confidence");
@@ -121,7 +143,14 @@ let selectedArchiveRaceId = null;
 let currentDrivers = [];
 let modelLabLoaded = false;
 let activeViewName = "pitstops";
+let liveRaceSocket = null;
+let platformSummary = null;
 const contextUsageByView = {
+  live: {
+    label: "Live Race",
+    scope: "direct",
+    summary: "Streams telemetry-aware strategy calls for the selected race and driver in a race-wall style view.",
+  },
   raceengineer: {
     label: "Race Engineer",
     scope: "direct",
@@ -217,7 +246,7 @@ function renderContextGuide() {
   contextRaceSummary.textContent = `${currentRaceDetail.season} ${currentRaceDetail.grand_prix} - ${currentRaceDetail.circuit}`;
   contextRaceNote.textContent = "This race selection updates shared defaults, race history, simulation context, and archive reference data across the dashboard.";
 
-  const chipOrder = ["pitstops", "optimizer", "simulation", "degradation", "raceengineer", "archive", "modellab"];
+  const chipOrder = ["live", "pitstops", "optimizer", "simulation", "degradation", "raceengineer", "archive", "modellab"];
   contextUsageChips.innerHTML = chipOrder.map((view) => {
     const config = contextUsageByView[view];
     return `<span class="context-chip ${config.scope}">${config.label}</span>`;
@@ -240,6 +269,106 @@ function renderContextGuide() {
 function setLoading(isLoading, label = "Running") {
   resultsLoading.hidden = !isLoading;
   optimizerStatus.textContent = isLoading ? label : "Ready";
+}
+
+function closeLiveRaceSocket() {
+  if (liveRaceSocket) {
+    liveRaceSocket.close();
+    liveRaceSocket = null;
+  }
+}
+
+function renderLiveRaceSnapshot(snapshot) {
+  if (!snapshot) {
+    return;
+  }
+  liveHeadline.textContent = snapshot.recommendation.headline;
+  liveSubheadline.textContent = snapshot.recommendation.reasons[0] || "Telemetry-aware recommendation updated.";
+  liveAction.textContent = snapshot.recommendation.action;
+  liveLap.textContent = `L${snapshot.telemetry.lap}`;
+  liveConfidence.textContent = `${Math.round(snapshot.recommendation.confidence * 100)}%`;
+  livePlanB.textContent = `L${snapshot.recommendation.pit_window_start}-${snapshot.recommendation.pit_window_end}`;
+  liveUndercut.textContent = `${snapshot.recommendation.undercut_gain_seconds.toFixed(2)}s`;
+  liveTrafficLoss.textContent = `${snapshot.recommendation.traffic_loss_seconds.toFixed(2)}s`;
+  liveTyreCliff.textContent = snapshot.recommendation.tyre_cliff_risk;
+
+  liveTelemetryGrid.innerHTML = [
+    ["Last Lap", `${snapshot.telemetry.last_lap_seconds.toFixed(3)}s`],
+    ["S1", `${snapshot.telemetry.sector_1_seconds.toFixed(3)}s`],
+    ["S2", `${snapshot.telemetry.sector_2_seconds.toFixed(3)}s`],
+    ["S3", `${snapshot.telemetry.sector_3_seconds.toFixed(3)}s`],
+    ["Gap Ahead", `${snapshot.telemetry.gap_ahead_seconds.toFixed(2)}s`],
+    ["Gap Behind", `${snapshot.telemetry.gap_behind_seconds.toFixed(2)}s`],
+    ["Tyre Age", `${snapshot.telemetry.tyre_age_laps} laps`],
+    ["Traffic", `${Math.round(snapshot.telemetry.traffic_index * 100)}%`],
+    ["SC Risk", `${Math.round(snapshot.telemetry.safety_car_probability * 100)}%`],
+  ].map(([label, value]) => `
+    <div class="detail-box">
+      <span>${label}</span>
+      <strong>${value}</strong>
+    </div>
+  `).join("");
+
+  liveWeatherGrid.innerHTML = [
+    ["Air Temp", `${snapshot.weather.air_temperature_c.toFixed(1)} C`],
+    ["Track Temp", `${snapshot.weather.track_temperature_c.toFixed(1)} C`],
+    ["Rain Risk", `${Math.round(snapshot.weather.rain_probability * 100)}%`],
+    ["Humidity", `${Math.round(snapshot.weather.humidity * 100)}%`],
+    ["Wind", `${snapshot.weather.wind_speed_kph.toFixed(1)} kph`],
+    ["Condition", snapshot.weather.condition],
+  ].map(([label, value]) => `
+    <div class="detail-box">
+      <span>${label}</span>
+      <strong>${value}</strong>
+    </div>
+  `).join("");
+
+  liveEventLog.innerHTML = snapshot.events.map((event) => `<li><strong>${event.title}:</strong> ${event.detail}</li>`).join("");
+  liveReasons.innerHTML = snapshot.recommendation.reasons.map((reason) => `<li>${reason}</li>`).join("");
+  liveScenarioNotes.innerHTML = snapshot.scenario_notes.map((note) => `<li>${note}</li>`).join("");
+}
+
+function startLiveRaceFeed() {
+  if (!currentRaceDetail || !liveDriver) {
+    return;
+  }
+  closeLiveRaceSocket();
+  const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+  const params = new URLSearchParams({
+    race_id: currentRaceDetail.race_id,
+    driver_code: liveDriver.value,
+    start_lap: String(Number(liveStartLap.value || 14)),
+    sample_size: String(Number(liveSampleSize.value || 8)),
+  });
+  const backendLabel = platformSummary ? `${platformSummary.engine} / ${platformSummary.live_provider}` : "live provider";
+  liveRaceStatus.textContent = `Connecting to ${backendLabel} telemetry stream...`;
+  liveStatusChip.textContent = "Connecting";
+  liveRaceSocket = new WebSocket(`${protocol}://${window.location.host}/ws/live-race?${params.toString()}`);
+  liveRaceSocket.onmessage = (event) => {
+    const payload = JSON.parse(event.data);
+    if (payload.event === "complete") {
+      liveRaceStatus.textContent = "Live feed complete. Restart to replay the race wall stream.";
+      liveStatusChip.textContent = "Complete";
+      return;
+    }
+    if (payload.event === "error") {
+      liveRaceStatus.textContent = `Live feed failed: ${payload.detail}`;
+      liveStatusChip.textContent = "Error";
+      return;
+    }
+    renderLiveRaceSnapshot(payload);
+    liveRaceStatus.textContent = `${payload.driver_code} live update received for lap ${payload.telemetry.lap}.`;
+    liveStatusChip.textContent = "Streaming";
+  };
+  liveRaceSocket.onerror = () => {
+    liveRaceStatus.textContent = "Live feed connection failed.";
+    liveStatusChip.textContent = "Error";
+  };
+  liveRaceSocket.onclose = () => {
+    if (liveStatusChip.textContent === "Streaming") {
+      liveStatusChip.textContent = "Closed";
+    }
+  };
 }
 
 async function fetchJson(url, timeoutMs = 8000) {
@@ -346,6 +475,9 @@ function populateDriverDropdowns() {
   simDriver.innerHTML = options;
   optimizerDriver.innerHTML = options;
   engineerDriver.innerHTML = options;
+  if (liveDriver) {
+    liveDriver.innerHTML = options;
+  }
 }
 
 function renderPitstopBoard() {
@@ -554,7 +686,7 @@ function renderModelLab(result) {
     <article class="model-card">
       <div class="panel-title-row">
         <p class="panel-kicker">${model.title}</p>
-        <span class="status-dot">${model.algorithm}</span>
+        <span class="status-dot">${model.algorithm} • ${model.version}</span>
       </div>
       <div class="spec-list">
         <div class="spec-row"><span>Target</span><strong>${model.target}</strong></div>
@@ -601,6 +733,13 @@ function renderModelLab(result) {
       <td>${row.actual_pit_stops.toFixed(1)} / ${row.predicted_pit_stops.toFixed(1)}</td>
     </tr>
   `).join("");
+  modelLabBacktestBody.insertAdjacentHTML("afterbegin", result.backtest_summary.map((item) => `
+    <tr class="summary-row">
+      <td colspan="2">${item.label}</td>
+      <td colspan="2"><strong>${item.value}</strong></td>
+      <td colspan="3">${item.description}</td>
+    </tr>
+  `).join(""));
   modelLabBacktestBody.insertAdjacentHTML("afterbegin", result.summary.map((item) => `
     <tr class="summary-row">
       <td colspan="7">${item}</td>
@@ -776,6 +915,9 @@ function applyRaceDetail(detail) {
     simDriver.value = preferredDriver.code;
     optimizerDriver.value = preferredDriver.code;
     engineerDriver.value = preferredDriver.code;
+    if (liveDriver) {
+      liveDriver.value = preferredDriver.code;
+    }
   }
   gridPosition.value = Math.min(20, 3 + detail.round);
   gridPositionLabel.textContent = `P${gridPosition.value}`;
@@ -1012,17 +1154,28 @@ function syncGlobalSelectorsFromRaceId(raceId) {
 }
 
 async function initializeCatalog() {
-  const [catalogResponse, driversResponse] = await Promise.all([
+  const [catalogResponse, driversResponse, platformResponse] = await Promise.all([
     fetchJson("/api/catalog"),
     fetchJson("/api/drivers/current"),
+    fetchJson("/api/platform"),
   ]);
   catalog = catalogResponse;
   currentDrivers = driversResponse;
+  platformSummary = platformResponse;
   globalSeason.value = String(catalog.seasons[catalog.seasons.length - 1]);
   populateGlobalSelectors();
   populateArchiveFilters();
   populateDriverDropdowns();
   renderContextGuide();
+  if (liveRaceStatus) {
+    liveRaceStatus.textContent = `Platform ready: ${platformSummary.engine} warehouse mode with ${platformSummary.live_provider} provider.`;
+  }
+  if (liveStatusChip) {
+    liveStatusChip.textContent = platformSummary.engine === "duckdb" ? "DuckDB" : "Fallback";
+  }
+  if (liveProviderName) {
+    liveProviderName.value = platformSummary.live_provider;
+  }
   await loadRaceDetail(globalRace.value);
   await runRaceEngineer();
 }
@@ -1093,4 +1246,12 @@ initializeCatalog().catch(() => {
 runSimulationButton.addEventListener("click", runSimulation);
 runRaceEngineerButton.addEventListener("click", runRaceEngineer);
 runModelLabButton.addEventListener("click", () => loadModelLab(true));
+if (liveSampleSize) {
+  liveSampleSize.addEventListener("input", () => {
+    liveSampleSizeLabel.textContent = `${liveSampleSize.value} snapshots`;
+  });
+}
+if (startLiveRaceButton) {
+  startLiveRaceButton.addEventListener("click", startLiveRaceFeed);
+}
 setActiveView(getInitialViewName());

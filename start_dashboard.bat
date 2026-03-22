@@ -1,15 +1,16 @@
 @echo off
 cd /d "%~dp0"
+
+set "PYTHON_EXE="
 if exist ".venv\Scripts\python.exe" (
-  ".venv\Scripts\python.exe" run_dashboard.py
+  set "PYTHON_EXE=%CD%\.venv\Scripts\python.exe"
 ) else (
-  py run_dashboard.py
+  set "PYTHON_EXE=py"
 )
-if errorlevel 1 (
-  echo.
-  echo Dashboard failed to start.
-  echo Check that Python dependencies are installed with:
-  echo   .venv\Scripts\python.exe -m pip install -r requirements.txt
-  echo.
-  pause
-)
+
+start "F1 Strategy Engine" cmd /k call "%PYTHON_EXE%" "%CD%\run_dashboard.py"
+
+echo.
+echo F1 Strategy Engine is starting in a new terminal window.
+echo Open http://127.0.0.1:8000/ once the server finishes booting.
+echo.

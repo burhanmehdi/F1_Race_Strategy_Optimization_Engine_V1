@@ -1,19 +1,45 @@
 ## Project preview
 
+## Project preview
+
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/a49b5180-f873-4155-ad5b-024c3d0001bc" width="90%" alt="Dashboard preview"/>
+  <img src="assets/screenshots/1.png" width="90%" alt="Simulation UI"/>
 </p>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/0ceae334-eefc-4b99-8175-1f84894abaee" width="70%" alt="UI preview"/>
+  <img src="assets/screenshots/2.png" width="90%" alt="Tyre Degradation"/>
 </p>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/3e6e7ef5-286b-4101-ac8c-2253b2bc352b" width="90%" alt="Feature preview"/>
+  <img src="assets/screenshots/3.png" width="90%" alt="Race Archive"/>
 </p>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/bbb313f8-f25c-454a-9bc7-60cd5b6d8178" width="90%" alt="Feature preview"/>
+  <img src="assets/screenshots/4.png" width="90%" alt="Model Lab"/>
+</p>
+
+<p align="center">
+  <img src="assets/screenshots/5.png" width="90%" alt="Backtesting"/>
+</p>
+
+<p align="center">
+  <img src="assets/screenshots/6.png" width="90%" alt="Strategy Engine"/>
+</p>
+
+<p align="center">
+  <img src="assets/screenshots/7.png" width="90%" alt="Pit Stops"/>
+</p>
+
+<p align="center">
+  <img src="assets/screenshots/8.png" width="90%" alt="Race Engineer Mode"/>
+</p>
+
+<p align="center">
+  <img src="assets/screenshots/9.png" width="90%" alt="Scenario Comparison"/>
+</p>
+
+<p align="center">
+  <img src="assets/screenshots/10.png" width="90%" alt="Optimizer"/>
 </p>
 
 ---

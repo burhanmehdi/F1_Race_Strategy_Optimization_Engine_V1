@@ -1,11 +1,12 @@
-"""Vercel entry under src/ (see https://vercel.com/docs/frameworks/backend/fastapi)."""
+"""Alternate Vercel FastAPI entry name (some CLI versions check app.py first)."""
 
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
-SRC = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent
+SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 

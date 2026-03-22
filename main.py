@@ -1,4 +1,8 @@
-"""Vercel FastAPI entry (https://vercel.com/docs/frameworks/backend/fastapi)."""
+"""Vercel FastAPI entry (matches examples/fastapi/main.py pattern).
+
+Adds ``src/`` to ``sys.path`` so ``f1_strategy_engine`` resolves during the build
+before ``pip install -e .`` has run.
+"""
 
 from __future__ import annotations
 

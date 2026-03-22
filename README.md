@@ -265,7 +265,7 @@ Requires dev extras (`pip install -e ".[dev]"`).
 
 ## Deploy on Vercel (GitHub)
 
-This app is a FastAPI project that Vercel can run as a Python backend ([FastAPI on Vercel](https://vercel.com/docs/frameworks/backend/fastapi)). The repo root has `index.py` exporting `app` (required for Vercel’s entrypoint detection), `pyproject.toml` also declares the same target under `[project.scripts]`, and a Vercel build step runs `scripts/train_model_lab.py` so `artifacts/model_lab.pkl` is generated during the build (the file stays gitignored but is included in the deployment output).
+This app is a FastAPI project that Vercel can run as a Python backend ([FastAPI on Vercel](https://vercel.com/docs/frameworks/backend/fastapi)). Root-level `main.py`, `index.py`, and `app.py` export `app` and prepend `src/` to `sys.path` so imports work during Vercel’s build (before `pip install -e .` is guaranteed). This matches how the official [Vercel FastAPI example](https://github.com/vercel/vercel/tree/main/examples/fastapi) uses a top-level `main.py`. `pyproject.toml` also lists `[project.scripts] app = ...`, and a Vercel build step runs `scripts/train_model_lab.py` so `artifacts/model_lab.pkl` is generated during the build (the file stays gitignored but is included in the deployment output).
 
 1. Push this repository to GitHub (for example [F1_Race_Strategy_Optimization_Engine_V1](https://github.com/burhanmehdi/F1_Race_Strategy_Optimization_Engine_V1)).
 2. In the [Vercel dashboard](https://vercel.com/new), **Add New Project** and import the same GitHub repository.

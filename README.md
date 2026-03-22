@@ -157,6 +157,8 @@ Install dev extras once, then run pytest:
 .venv\Scripts\python.exe -m pytest -q
 ```
 
+---
+
 ## Documentation
 
 - [Product brief](docs/product_brief.md)

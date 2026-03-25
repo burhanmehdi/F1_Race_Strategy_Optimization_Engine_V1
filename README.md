@@ -62,7 +62,6 @@
 - [Data](#data)
 - [Run locally](#run-locally)
 - [Tests](#tests)
-- [Deploy on Vercel](#deploy-on-vercel)
 - [Documentation](#documentation)
 
 ---
